@@ -176,7 +176,16 @@ main{padding:22px 32px 52px;}
 .badge-teal{background:#f0fafa;color:#0d9488;}
 .badge-orange{background:#fff5f0;color:#ea580c;}
 .learnings-header{font-size:11px;letter-spacing:0.1em;font-weight:800;text-transform:uppercase;color:var(--grey);margin-bottom:16px;}
-/* Comparison rows */
+/* SPEND TABLE */
+.spend-table{width:100%;border-collapse:collapse;font-size:12px;}
+.spend-table th{text-align:left;padding:8px 12px;font-size:10px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:var(--grey);border-bottom:2px solid var(--border);}
+.spend-table td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--black);}
+.spend-table tr:last-child td{border-bottom:none;font-weight:800;background:#fafafa;}
+.spend-table .num{text-align:right;font-variant-numeric:tabular-nums;}
+.spend-table .cpl-good{color:#16a34a;font-weight:700;}
+.spend-table .cpl-mid{color:#d97706;font-weight:700;}
+.spend-table .cpl-bad{color:#dc2626;font-weight:700;}
+.spend-total-row td{background:#FFF5F5 !important;color:var(--red) !important;}
 .cmp-list{display:flex;flex-direction:column;gap:18px;}
 .cmp-row{display:flex;flex-direction:column;gap:6px;}
 .cmp-label{font-size:11px;font-weight:700;color:var(--black);letter-spacing:0.04em;}
@@ -447,12 +456,16 @@ main{padding:22px 32px 52px;}
     <div class="kpi-row" id="kpi-kampagne"></div>
     <div class="grid-2">
       <div class="card">
-        <div class="card-title">Kampagnen-Performance</div>
+        <div class="card-title">Kampagnen-Performance (Leads)</div>
         <div class="hbar-list" id="hbar-camp"></div>
       </div>
       <div class="card">
         <div class="card-title">Kampagnen-Mix</div>
         <div style="position:relative;height:230px"><canvas id="chart-camp"></canvas></div>
+      </div>
+      <div class="card span-2">
+        <div class="card-title">Budget & CPL pro Adset — META Ads Manager</div>
+        <div id="spend-table"></div>
       </div>
       <div class="card span-2">
         <div class="card-title">DE vs. FR Verteilung</div>
@@ -501,6 +514,14 @@ let S = {
   poles:   [{l:'Leki',v:256},{l:'KV+',v:178},{l:'Swix',v:104},{l:'One Way',v:75},{l:'Exel',v:23},{l:'Fischer',v:18},{l:'Andere',v:70}],
   wax:     [{l:'Toko',v:463},{l:'FZero',v:88},{l:'Swix',v:48},{l:'Vauhti',v:25},{l:'Holmenkol',v:16},{l:'Rode',v:7},{l:'Andere',v:77}],
   camp:    [{l:'DE Broad',v:2821},{l:'FR Broad',v:1066},{l:'DE Retarget',v:246},{l:'FR Retarget',v:108},{l:'DE Story',v:79},{l:'FR Story',v:73}],
+  campSpend: [
+    {l:'DE Broad',    leads:2794, cpl:1.09, spend:3053.15},
+    {l:'FR Broad',    leads:1072, cpl:1.09, spend:1168.33},
+    {l:'DE Retarget', leads:273,  cpl:1.01, spend:274.79},
+    {l:'FR Retarget', leads:100,  cpl:1.23, spend:122.84},
+    {l:'DE Story',    leads:79,   cpl:2.76, spend:218.30},
+    {l:'FR Story',    leads:80,   cpl:2.03, spend:162.57},
+  ],
   cities:  [{l:'Zürich',v:128},{l:'Bern',v:100},{l:'Luzern',v:65},{l:'Chur',v:65},{l:'Lausanne',v:48},{l:'Winterthur',v:41},{l:'Basel',v:39},{l:'Genève',v:31},{l:'St. Gallen',v:31},{l:'Schaffhausen',v:31}],
 };
 
@@ -614,15 +635,56 @@ function render() {
   const deStory = S.camp.find(d=>d.l==='DE Story')?.v||0;
   const frStory = S.camp.find(d=>d.l==='FR Story')?.v||0;
   const broadRatio = Math.round(S.broad/Math.max(S.retarget,1));
+  const totalMetaSpend = S.campSpend.reduce((s,d)=>s+d.spend,0);
+  const totalMetaLeads = S.campSpend.reduce((s,d)=>s+d.leads,0);
   setHTML('kpi-kampagne', [
-    kpi(fmt(S.broad),      'Broad + Story',     pct(S.broad,T)+'% aller Leads', true),
-    kpi(fmt(S.retarget),   'Retargeting',        pct(S.retarget,T)+'% aller Leads'),
-    kpi(fmt(S.de_total),   'DE Gesamt META',     'Broad + Story + Retarget DE'),
-    kpi(fmt(S.fr_total),   'FR Gesamt META',     'Broad + Story + Retarget FR'),
-    kpi(broadRatio+' : 1', 'Broad : Retarget',  'Verhältnis Neu- zu Retarget-Leads'),
+    kpi(fmt(S.broad),      'Broad + Story',      pct(S.broad,T)+'% aller Leads', true),
+    kpi(fmt(S.retarget),   'Retargeting',         pct(S.retarget,T)+'% aller Leads'),
+    kpi(fmt(S.de_total),   'DE Gesamt META',      'Broad + Story + Retarget DE'),
+    kpi(fmt(S.fr_total),   'FR Gesamt META',      'Broad + Story + Retarget FR'),
+    kpi('CHF 4\'999.—',   'Total META Spend (CHF)',   fmt(totalMetaLeads)+' Leads via Ads Manager'),
+    kpi('CHF 1.14',        'Ø CPL (CHF)',               'Bester: DE Retarget CHF 1.01'),
   ].join(''));
   buildHBars('hbar-camp', S.camp, T);
   renderDonutChart('chart-camp', S.camp, T);
+
+  // ── SPEND TABLE ──
+  const totalSpend = S.campSpend.reduce((s,d)=>s+d.spend,0);
+  const totalLeads = S.campSpend.reduce((s,d)=>s+d.leads,0);
+  const avgCPL = (totalSpend/totalLeads).toFixed(2);
+  const bestCPL = Math.min(...S.campSpend.map(d=>d.cpl));
+  const worstCPL = Math.max(...S.campSpend.map(d=>d.cpl));
+  function cplClass(cpl) {
+    if(cpl <= bestCPL * 1.1) return 'cpl-good';
+    if(cpl >= worstCPL * 0.9) return 'cpl-bad';
+    return 'cpl-mid';
+  }
+  setHTML('spend-table', `
+    <table class="spend-table">
+      <thead><tr>
+        <th>Adset</th>
+        <th class="num">Leads</th>
+        <th class="num">CPL</th>
+        <th class="num">Spend</th>
+        <th class="num">Anteil Budget</th>
+      </tr></thead>
+      <tbody>
+        ${S.campSpend.map(d=>`<tr>
+          <td>${d.l}</td>
+          <td class="num">${fmt(d.leads)}</td>
+          <td class="num ${cplClass(d.cpl)}">CHF ${d.cpl.toFixed(2)}</td>
+          <td class="num">CHF ${d.spend.toLocaleString('de-CH',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+          <td class="num">${((d.spend/totalSpend)*100).toFixed(1)}%</td>
+        </tr>`).join('')}
+        <tr class="spend-total-row">
+          <td><strong>Total META</strong></td>
+          <td class="num"><strong>${fmt(totalLeads)}</strong></td>
+          <td class="num"><strong>CHF ${avgCPL}</strong></td>
+          <td class="num"><strong>CHF ${totalSpend.toLocaleString('de-CH',{minimumFractionDigits:2,maximumFractionDigits:2})}</strong></td>
+          <td class="num"><strong>100%</strong></td>
+        </tr>
+      </tbody>
+    </table>`);
 
   const deBroad = S.camp.find(d=>d.l==='DE Broad')?.v||0;
   const frBroad = S.camp.find(d=>d.l==='FR Broad')?.v||0;
@@ -969,7 +1031,7 @@ function renderPartner() {
 
 function kpi(val, label, sub, accent=false) {
   const numStr = typeof val === 'string' && val.replace(/[^0-9]/g,'');
-  const hasCount = !isNaN(+numStr) && numStr.length > 0 && !val.includes(':');
+  const hasCount = !isNaN(+numStr) && numStr.length > 0 && !val.includes(':') && !/^[A-Za-z]/.test(val);
   return `<div class="kpi${accent?' accent':''}">
     <div class="kpi-label">${label}</div>
     <div class="kpi-value"${hasCount?` data-count="${numStr}"`:''}>${val}</div>
