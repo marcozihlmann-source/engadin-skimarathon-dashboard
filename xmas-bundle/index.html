@@ -227,7 +227,7 @@ main{padding:22px 32px 52px;}
 .hbar-track{background:var(--bg);border-radius:2px;height:5px;overflow:hidden;}
 .hbar-fill{height:100%;border-radius:2px;width:0;transition:width 1s cubic-bezier(0.4,0,0.2,1);}
 
-/* PHONE / DEFR */
+/* GENDER / DEFR */
 .phone-bars{display:flex;flex-direction:column;gap:14px;}
 .phone-bar-head{display:flex;justify-content:space-between;margin-bottom:5px;font-size:12px;font-weight:600;color:var(--dark);}
 .phone-bar-head span{color:var(--red);font-weight:700;}
@@ -365,7 +365,7 @@ main{padding:22px 32px 52px;}
       <div class="header-brand">
         <h1 id="hdr-title">X-Mas Bundle</h1>
       </div>
-      <div class="header-sub">Game Campaign · Lead Dashboard</div>
+      <div class="header-sub">LeadGen · Lead Dashboard</div>
     </div>
     <div class="header-right">
       <div class="header-meta">
@@ -396,7 +396,7 @@ main{padding:22px 32px 52px;}
         <div class="donuts-row" id="donuts-row"></div>
       </div>
       <div class="card">
-        <div class="card-title">Telefonnummer-Qualität</div>
+        <div class="card-title">Gender-Verteilung</div>
         <div style="position:relative;height:205px"><canvas id="chart-roles"></canvas></div>
       </div>
       <div class="card">
@@ -404,7 +404,7 @@ main{padding:22px 32px 52px;}
         <div style="position:relative;height:205px"><canvas id="chart-lang"></canvas></div>
       </div>
       <div class="card">
-        <div class="card-title">Telefon-Qualität der Leads</div>
+        <div class="card-title">Gender-Split</div>
         <div class="phone-bars" id="phone-bars"></div>
       </div>
     </div>
@@ -428,7 +428,7 @@ main{padding:22px 32px 52px;}
         <div class="best-box" id="best-box"></div>
       </div>
       <div class="card span-2">
-        <div class="card-title">Paid vs. Organisch Überblick</div>
+        <div class="card-title">Paid Social Überblick</div>
         <div class="paid-wrap">
           <div class="paid-bars" id="paid-bars"></div>
           <div class="paid-insights" id="paid-insights"></div>
@@ -473,16 +473,24 @@ main{padding:22px 32px 52px;}
    STATE — alle Werte zentral hier
 ============================================= */
 let S = {
-  meta: { title: 'X-Mas Bundle', stand: 'Stand März 2026' },
-  total: 0,
-  withPhone: 0, noPhone: 0, organic: 0,
-  broad: 0, de_total: 0, fr_total: 0,
+  meta: { title: 'X-Mas Bundle', stand: 'Stand Dezember 2025' },
+  total: 7840,
+  male: 3301, female: 4539, organic: 0,
+  broad: 7840, de_total: 6481, fr_total: 1359,
 
-  source:  [],
-  content: [],
-  camp:    [],
-  campSpend: [],
-  adsets: [],
+  source:  [{l:'META Ads',v:7840}],
+  content: [{l:'DE Image Ad (22.11)',v:4499},{l:'DE Image Ad (26.11)',v:1991},{l:'FR Image Ad (22.11)',v:873},{l:'FR Image Ad (26.11)',v:487}],
+  camp:    [{l:'DE Broad',v:6481},{l:'FR Broad',v:1359}],
+  campSpend: [
+    {l:'DE Broad', leads:6490, cpl:0.55, spend:3566.92},
+    {l:'FR Broad', leads:1360, cpl:0.57, spend:776.60},
+  ],
+  adsets: [
+    {l:'adset1-de-imagead (22.11.2025)', impressions:216580, reach:80905, freq:2.68, cpm:10.53, clicks:6694, von:'22.11.2025', bis:'14.12.2025', days:22},
+    {l:'adset1-de-imagead (26.11.2025)', impressions:156988, reach:84302, freq:1.86, cpm:8.19, clicks:3257, von:'26.11.2025', bis:'14.12.2025', days:18},
+    {l:'adset2-fr (22.11.2025)', impressions:54935, reach:23627, freq:2.33, cpm:8.28, clicks:1297, von:'22.11.2025', bis:'14.12.2025', days:22},
+    {l:'adset2-fr-imagead (26.11.2025)', impressions:33991, reach:16294, freq:2.09, cpm:9.47, clicks:772, von:'26.11.2025', bis:'14.12.2025', days:18},
+  ],
 };
 
 const RED = '#E3001B';
@@ -504,12 +512,11 @@ function render() {
 
   // -- ÜBERSICHT KPIs --
   setHTML('kpi-uebersicht', [
-    kpi(fmt(S.total),      'Total Leads',       'Alle Spielteilnahmen gesamt', true),
-    kpi(fmt(S.withPhone),'Mit Telefonnummer', pct(S.withPhone,T)+'% -- qualifiziert für Outreach'),
-    kpi(fmt(S.noPhone),'Ohne Telefonnummer', pct(S.noPhone,T)+'% ohne Telefon'),
+    kpi(fmt(S.total),      'Total Leads',       'Alle Leads gesamt', true),
+    kpi(fmt(S.female),'Weiblich', pct(S.female,T)+'% aller Leads'),
+    kpi(fmt(S.male),'Männlich', pct(S.male,T)+'% aller Leads'),
     kpi(fmt(S.de_total),   'DE Leads',        pct(S.de_total,T)+'% aller Leads'),
     kpi(fmt(S.fr_total),   'FR Leads',        pct(S.fr_total,T)+'% aller Leads'),
-    kpi(fmt(S.organic),'Organisch / Direkt', 'Leads ohne UTM-Tracking'),
   ].join(''));
 
   // Donuts
@@ -517,35 +524,34 @@ function render() {
 
   // Charts
   renderDonutChart('chart-roles',
-    [{l:'Mit Telefonnummer',v:S.withPhone},{l:'Ohne Telefonnummer',v:S.noPhone}], T);
+    [{l:'Weiblich',v:S.female},{l:'Männlich',v:S.male}], T);
   renderDonutChart('chart-lang',
     [{l:'Deutsch',v:S.de_total||Math.round(T*0.75)},{l:'Français',v:S.fr_total||Math.round(T*0.25)}], T);
-  // Phone bars
+  // Gender bars
   setHTML('phone-bars', `
     <div class="phone-bar-row">
-      <div class="phone-bar-head">Mit Telefonnummer <span>${pct(S.withPhone,T)}%</span></div>
-      <div class="phone-track"><div class="phone-fill" style="background:var(--red)" data-w="${pct(S.withPhone,T)}"></div></div>
-      <div class="phone-sub">${fmt(S.withPhone)} Leads</div>
+      <div class="phone-bar-head">Weiblich <span>${pct(S.female,T)}%</span></div>
+      <div class="phone-track"><div class="phone-fill" style="background:var(--red)" data-w="${pct(S.female,T)}"></div></div>
+      <div class="phone-sub">${fmt(S.female)} Leads</div>
     </div>
     <div class="phone-bar-row">
-      <div class="phone-bar-head">Ohne Telefonnummer <span>${pct(S.noPhone,T)}%</span></div>
-      <div class="phone-track"><div class="phone-fill" style="background:#E2E2E2" data-w="${pct(S.noPhone,T)}"></div></div>
-      <div class="phone-sub">${fmt(S.noPhone)} Leads</div>
+      <div class="phone-bar-head">Männlich <span>${pct(S.male,T)}%</span></div>
+      <div class="phone-track"><div class="phone-fill" style="background:#888" data-w="${pct(S.male,T)}"></div></div>
+      <div class="phone-sub">${fmt(S.male)} Leads</div>
     </div>
     <div class="outreach-box">
-      <div class="ol">Qualifiziert für Outreach</div>
-      <div class="ov">${fmt(S.withPhone)}</div>
-      <div class="os">Leads mit Telefonnummer</div>
+      <div class="ol">Grösste Zielgruppe</div>
+      <div class="ov">${fmt(S.female)}</div>
+      <div class="os">Weibliche Leads</div>
     </div>`);
   animateFills(document.getElementById('phone-bars'));
 
   // -- KANAL KPIs --
-  const ig = S.source.find(d=>d.l==='Instagram')?.v||0;
-  const fb = S.source.find(d=>d.l==='Facebook')?.v||0;
+  const metaAds = S.source.find(d=>d.l==='META Ads')?.v||S.total;
   setHTML('kpi-kanal', [
-    kpi(fmt(ig), 'Instagram',       pct(ig,T)+'% -- stärkster Kanal', true),
-    kpi(fmt(fb), 'Facebook',        pct(fb,T)+'% aller Leads'),
-    kpi(fmt(S.organic),'Organisch / Direkt','Kein UTM trackbar'),
+    kpi(fmt(metaAds), 'META Ads',       '100% aller Leads', true),
+    kpi("12'020", 'Link-Klicks',        'Total Klicks auf Anzeigen'),
+    kpi('CHF 0.36', 'CPC',              'CHF 4\'343.52 / 12\'020 Klicks'),
   ].join(''));
 
   buildHBars('hbar-source',  S.source,  T);
@@ -558,12 +564,11 @@ function render() {
     <div class="bv">${best.l} -- ${fmt(best.v)} Leads</div>
     <div class="bs">${pct(best.v,T)}% aller Leads via einem einzigen Creative</div>`);
 
-  const paidTotal = ig+fb;
-  const paid = [{l:'Paid Social (IG + FB)',v:paidTotal},{l:'Organisch / Direkt',v:S.organic}];
+  const paid = [{l:'Paid Social (META Ads)',v:metaAds}];
   buildPaidBars(paid);
   setHTML('paid-insights', [
-    ins('Paid Social Anteil',   pct(paidTotal,T)+'%'),
-    ins('IG-Anteil am Paid',    pct(ig,Math.max(paidTotal,1))+'%'),
+    ins('Paid Social Anteil',   '100%'),
+    ins('DE-Anteil',            pct(S.de_total,T)+'%'),
     ins('Best Creative Anteil', pct(best.v,T)+'%'),
   ].join(''));
 
@@ -692,67 +697,63 @@ function render() {
 /* --- helpers --- */
 function renderLearnings() {
   const T = S.total || 1;
-  const ig = S.source.find(d=>d.l==='Instagram')?.v||0;
-  const fb = S.source.find(d=>d.l==='Facebook')?.v||0;
-  const paidTotal = ig + fb;
   const bestContent = [...S.content].sort((a,b)=>b.v-a.v)[0];
   const deBroad = S.camp.find(d=>d.l==='DE Broad')?.v||0;
   const frBroad = S.camp.find(d=>d.l==='FR Broad')?.v||0;
-  const metaTotal = deBroad + frBroad;
 
   const learnings = [
     {
       icon: '📸', color: 'red', badge: 'badge-red', tag: 'Creative Performance',
-      title: 'Creative-Varianten testen und Best Performer identifizieren',
-      text: `${bestContent ? bestContent.l : 'Bestes Creative'} ist aktuell der stärkste Content. Bildsprache und Format haben einen überproportionalen Einfluss auf die Lead-Rate.`
-    },
-    {
-      icon: '📱', color: 'blue', badge: 'badge-blue', tag: 'Kanal-Allokation',
-      title: 'Kanal-Performance laufend auswerten',
-      text: `Instagram lieferte ${fmt(ig)} Leads (${pct(ig,Math.max(paidTotal,1))}% des Paid-Traffics) vs. ${fmt(fb)} auf Facebook. Die Kanal-Allokation sollte laufend optimiert werden.`
+      title: 'Erste Image Ads deutlich stärker als Nachzügler',
+      text: `${bestContent ? bestContent.l : 'Bestes Creative'} generierte ${bestContent ? fmt(bestContent.v) : '0'} Leads (${bestContent ? pct(bestContent.v,T) : '0'}%). Die früh geschalteten Ads hatten klaren Vorsprung -- Timing ist entscheidend für die Performance.`
     },
     {
       icon: '🌍', color: 'teal', badge: 'badge-teal', tag: 'Sprachregionen',
-      title: 'FR-Markt gezielt bearbeiten',
-      text: `${fmt(frBroad)} Leads aus FR-Kampagnen (${pct(frBroad,T)}% aller META-Leads). Die Performance in der Romandie beobachten und ggf. Budget anpassen.`
+      title: 'DE/FR-Split: 83% vs. 17%',
+      text: `${fmt(deBroad)} Leads aus DE-Kampagnen vs. ${fmt(frBroad)} aus FR. Der DE-Markt dominiert klar, FR zeigt aber soliden CPL (CHF 0.57) und Skalierungspotenzial.`
     },
     {
-      icon: '🔄', color: 'purple', badge: 'badge-purple', tag: 'Skalierung',
-      title: 'DE/FR Budget-Split laufend optimieren',
-      text: `DE Broad lieferte ${fmt(deBroad)} Leads, FR Broad ${fmt(frBroad)} Leads. Der CPL in FR ist tiefer -- Potenzial für Budget-Verschiebung Richtung FR prüfen.`
+      icon: '👩', color: 'purple', badge: 'badge-purple', tag: 'Gender-Insight',
+      title: 'Weibliche Zielgruppe überproportional stark',
+      text: `${fmt(S.female)} weibliche Leads (${pct(S.female,T)}%) vs. ${fmt(S.male)} männliche (${pct(S.male,T)}%). Das X-Mas Bundle spricht Frauen stärker an -- Creatives und Messaging entsprechend optimieren.`
     },
     {
-      icon: '📞', color: 'green', badge: 'badge-green', tag: 'Datenqualität',
-      title: 'Telefonnummer-Rate als Qualitätsindikator nutzen',
-      text: `${fmt(S.withPhone)} von ${fmt(S.total)} Leads (${pct(S.withPhone,T)}%) hinterliessen ihre Nummer -- ein Indikator für echtes Interesse und Kaufbereitschaft.`
+      icon: '💰', color: 'green', badge: 'badge-green', tag: 'Effizienz',
+      title: 'Sehr tiefer CPL unter CHF 0.60',
+      text: `Durchschnittlicher CPL von CHF 0.56 bei Total-Spend von CHF 4\'343.52. Beide Kampagnen (DE: CHF 0.55, FR: CHF 0.57) liefern effizient.`
     },
     {
-      icon: '⚡', color: 'red', badge: 'badge-red', tag: 'Owned Channels',
-      title: 'Organische Leads als kostenlosen Kanal stärken',
-      text: `${fmt(S.organic)} Leads (${pct(S.organic,T)}% aller Leads) entstanden ohne Paid-Touchpoint. Diese Stammzielgruppe kann als kostenloser Lead-Kanal weiter ausgebaut werden.`
+      icon: '🔄', color: 'blue', badge: 'badge-blue', tag: 'Skalierung',
+      title: 'Zweite Welle Ads mit tieferem CPM',
+      text: `Die am 26.11. gestarteten Ads zeigten tiefere CPMs (DE: 8.19, FR: 9.47) als die Erstschaltung. Gestaffelte Launches können die Gesamteffizienz steigern.`
+    },
+    {
+      icon: '⚡', color: 'red', badge: 'badge-red', tag: 'Reichweite',
+      title: 'Über 200\'000 Personen erreicht',
+      text: `Total Reach über alle Adsets von rund 205\'000 Personen. Die Frequenz lag bei moderaten 2.0--2.7, was auf gesunde Ausspielung ohne Übersättigung hindeutet.`
     },
   ];
 
   const nextSteps = [
     {
       icon: '🎯',
-      title: 'Kampagnen-Setup finalisieren',
-      desc: 'Zielgruppen, Budgets und Creatives für die X-Mas Bundle definieren und im Ads Manager aufsetzen.'
-    },
-    {
-      icon: '📸',
-      title: 'Creatives produzieren',
-      desc: 'Mehrere Image- und Video-Varianten erstellen. FR-spezifische Varianten von Beginn weg mitproduzieren.'
+      title: 'Lead-Daten auswerten & segmentieren',
+      desc: 'Gender- und Sprachdaten nutzen, um Zielgruppen-Segmente für Follow-up-Kampagnen zu bilden.'
     },
     {
       icon: '📬',
-      title: 'Owned Channels aktivieren',
-      desc: 'Email-Marketing und Social-Kanäle als zusätzliche Lead-Quellen einsetzen, um den Paid-Anteil zu entlasten.'
+      title: 'E-Mail Follow-up starten',
+      desc: 'Personalisierte E-Mail-Sequenzen an die 7\'840 Leads versenden -- DE und FR getrennt, mit Gender-spezifischem Messaging.'
+    },
+    {
+      icon: '📸',
+      title: 'Creative Learnings übertragen',
+      desc: 'Die Erkenntnisse zu Image Ad Performance und Timing auf zukünftige Kampagnen (z.B. Neujahrs-Aktionen) anwenden.'
     },
     {
       icon: '📊',
-      title: 'Monitoring & Optimierung',
-      desc: 'Laufend CPL, CTR und Kanal-Performance monitoren. Budget-Shifts basierend auf Echtzeit-Daten vornehmen.'
+      title: 'ROI-Analyse & Reporting',
+      desc: 'Conversion-Rate der Leads tracken und den Return on Ad Spend der X-Mas Bundle Kampagne berechnen.'
     },
   ];
 
@@ -809,7 +810,7 @@ function renderDonuts() {
   const T = S.total || 1;
   const items = [
     {id:'d-leads', pct:100, label:'Total Leads', val:S.total},
-    {id:'d-tel',   pct:+pct(S.withPhone,T), label:'Mit Telefon', val:S.withPhone},
+    {id:'d-tel',   pct:+pct(S.female,T), label:'Weiblich', val:S.female},
   ];
   const CIRC = 2*Math.PI*44;
   setHTML('donuts-row', items.map(it=>`
@@ -978,11 +979,10 @@ function buildEditPanel() {
     <div class="ep-section-title">Übersicht -- Hauptzahlen</div>
     <div class="ep-row">
       <div class="ep-field"><label>Total Leads</label><input type="number" data-key="total" value="${S.total}"></div>
-      <div class="ep-field"><label>Mit Telefonnummer</label><input type="number" data-key="withPhone" value="${S.withPhone}"></div>
+      <div class="ep-field"><label>Weiblich</label><input type="number" data-key="female" value="${S.female}"></div>
     </div>
     <div class="ep-row">
-      <div class="ep-field"><label>Ohne Telefonnummer</label><input type="number" data-key="noPhone" value="${S.noPhone}"></div>
-      <div class="ep-field"><label>Organisch / Direkt</label><input type="number" data-key="organic" value="${S.organic}"></div>
+      <div class="ep-field"><label>Männlich</label><input type="number" data-key="male" value="${S.male}"></div>
     </div>
   </div>
 
