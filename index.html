@@ -64,6 +64,28 @@ body{font-family:'Outfit','Helvetica Neue',Arial,sans-serif;background:var(--bg)
 .cmp-report-btn:hover{opacity:0.85;}
 .cmp-report-btn-ghost{display:inline-flex;align-items:center;gap:5px;background:none;color:var(--grey);border:1.5px solid var(--border);border-radius:7px;padding:6px 13px;font-family:inherit;font-size:12px;font-weight:600;cursor:default;opacity:0.6;}
 
+/* CPL COLORS */
+.cpl-good{color:#15803d !important;}
+.cpl-mid{color:#b45309 !important;}
+.cpl-bad{color:var(--red) !important;}
+
+/* BENCHMARK CARD */
+.benchmark-card{background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);padding:28px 28px 24px;margin-top:24px;}
+.benchmark-title{font-size:14px;font-weight:800;color:var(--black);margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+.benchmark-title svg{flex-shrink:0;}
+.benchmark-desc{font-size:12px;color:var(--mid);line-height:1.7;margin-bottom:18px;}
+.benchmark-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:600px){.benchmark-grid{grid-template-columns:1fr;}}
+.benchmark-box{border:1px solid var(--border);border-radius:10px;padding:18px 20px;}
+.benchmark-box-title{font-size:11px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:var(--black);margin-bottom:4px;}
+.benchmark-box-fields{font-size:11px;color:var(--grey);margin-bottom:12px;}
+.benchmark-ampel{display:flex;gap:8px;flex-wrap:wrap;}
+.benchmark-pill{font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;}
+.benchmark-pill.green{background:#f0faf3;color:#15803d;}
+.benchmark-pill.orange{background:#fff7ed;color:#b45309;}
+.benchmark-pill.red{background:rgba(227,0,27,0.08);color:var(--red);}
+.lead-type-tag{display:inline-block;font-size:9px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:#f5f5f5;color:var(--grey);margin-top:3px;}
+
 /* RESPONSIVE */
 @media(max-width:700px){.home-body{padding:16px;}.home-kpi-row{gap:8px;}.cmp-table{font-size:12px;}}
 </style>
@@ -152,7 +174,7 @@ body{font-family:'Outfit','Helvetica Neue',Arial,sans-serif;background:var(--bg)
           </td>
           <td><span class="cmp-badge done">Abgeschlossen</span></td>
           <td><span class="cmp-val red">6'185</span></td>
-          <td><span class="cmp-val">CHF 1.14</span></td>
+          <td><span class="cmp-val cpl-good">CHF 1.14</span></td>
           <td><span class="cmp-val" style="font-size:12px;font-weight:600;">Meta</span></td>
           <td><span class="cmp-val" style="font-size:12px;font-weight:500;">Feb – Mär 2026</span></td>
           <td><button class="cmp-report-btn" onclick="window.location.href='engadin-skimarathon-2026/'">Report ansehen →</button></td>
@@ -164,7 +186,7 @@ body{font-family:'Outfit','Helvetica Neue',Arial,sans-serif;background:var(--bg)
           </td>
           <td><span class="cmp-badge done">Abgeschlossen</span></td>
           <td><span class="cmp-val red">7'509</span></td>
-          <td><span class="cmp-val">CHF 0.41</span></td>
+          <td><span class="cmp-val cpl-good">CHF 0.41</span></td>
           <td><span class="cmp-val" style="font-size:12px;font-weight:600;">Meta</span></td>
           <td><span class="cmp-val" style="font-size:12px;font-weight:500;">Jan – Feb 2026</span></td>
           <td><button class="cmp-report-btn" onclick="window.location.href='fuenfer-challenge-2026/'">Report ansehen →</button></td>
@@ -176,7 +198,7 @@ body{font-family:'Outfit','Helvetica Neue',Arial,sans-serif;background:var(--bg)
           </td>
           <td><span class="cmp-badge done">Abgeschlossen</span></td>
           <td><span class="cmp-val red">3'854</span></td>
-          <td><span class="cmp-val">CHF 0.91</span></td>
+          <td><span class="cmp-val cpl-good">CHF 0.91</span></td>
           <td><span class="cmp-val" style="font-size:12px;font-weight:600;">Meta</span></td>
           <td><span class="cmp-val" style="font-size:12px;font-weight:500;">Jan 2026</span></td>
           <td><button class="cmp-report-btn" onclick="window.location.href='hanegg-challenge/'">Report ansehen →</button></td>
@@ -188,7 +210,7 @@ body{font-family:'Outfit','Helvetica Neue',Arial,sans-serif;background:var(--bg)
           </td>
           <td><span class="cmp-badge done">Abgeschlossen</span></td>
           <td><span class="cmp-val red">7'840</span></td>
-          <td><span class="cmp-val">CHF 0.55</span></td>
+          <td><span class="cmp-val cpl-good">CHF 0.55</span></td>
           <td><span class="cmp-val" style="font-size:12px;font-weight:600;">Meta</span></td>
           <td><span class="cmp-val" style="font-size:12px;font-weight:500;">Nov – Dez 2025</span></td>
           <td><button class="cmp-report-btn" onclick="window.location.href='xmas-bundle/'">Report ansehen →</button></td>
@@ -200,7 +222,7 @@ body{font-family:'Outfit','Helvetica Neue',Arial,sans-serif;background:var(--bg)
           </td>
           <td><span class="cmp-badge done">Abgeschlossen</span></td>
           <td><span class="cmp-val red">1'791</span></td>
-          <td><span class="cmp-val">CHF 2.04</span></td>
+          <td><span class="cmp-val cpl-good">CHF 2.04</span></td>
           <td><span class="cmp-val" style="font-size:12px;font-weight:600;">Meta</span></td>
           <td><span class="cmp-val" style="font-size:12px;font-weight:500;">Aug – Nov 2025</span></td>
           <td><button class="cmp-report-btn" onclick="window.location.href='levada-kids/'">Report ansehen →</button></td>
@@ -212,7 +234,7 @@ body{font-family:'Outfit','Helvetica Neue',Arial,sans-serif;background:var(--bg)
           </td>
           <td><span class="cmp-badge done">Abgeschlossen</span></td>
           <td><span class="cmp-val red">2'152</span></td>
-          <td><span class="cmp-val">CHF 0.35</span></td>
+          <td><span class="cmp-val cpl-good">CHF 0.35</span></td>
           <td><span class="cmp-val" style="font-size:12px;font-weight:600;">Meta</span></td>
           <td><span class="cmp-val" style="font-size:12px;font-weight:500;">Jun – Jul 2025</span></td>
           <td><button class="cmp-report-btn" onclick="window.location.href='summer-kollektion/'">Report ansehen →</button></td>
@@ -224,13 +246,44 @@ body{font-family:'Outfit','Helvetica Neue',Arial,sans-serif;background:var(--bg)
           </td>
           <td><span class="cmp-badge done">Abgeschlossen</span></td>
           <td><span class="cmp-val red">1'745</span></td>
-          <td><span class="cmp-val">CHF 0.55</span></td>
+          <td><span class="cmp-val cpl-good">CHF 0.55</span></td>
           <td><span class="cmp-val" style="font-size:12px;font-weight:600;">Meta</span></td>
           <td><span class="cmp-val" style="font-size:12px;font-weight:500;">Mai – Jun 2025</span></td>
           <td><button class="cmp-report-btn" onclick="window.location.href='cycling-kollektion/'">Report ansehen →</button></td>
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- CPL BENCHMARK INFO -->
+  <div class="benchmark-card">
+    <div class="benchmark-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      CPL-Bewertung nach Leadtyp
+    </div>
+    <div class="benchmark-desc">
+      Für die Bewertung von Meta Leadkampagnen unterscheiden wir zwischen <strong>Standard Leads</strong> und <strong>erweiterten Leads</strong>. Standard Leads enthalten Vorname, Nachname und E-Mail und weisen eine tiefere Formularhürde auf. Erweiterte Leads enthalten zusätzliche Kontaktangaben wie Adresse und Telefonnummer und sind aufgrund der höheren Hürde mit einem höheren CPL zu bewerten. Die Ampelbewertung erfolgt deshalb differenziert nach Leadtyp.
+    </div>
+    <div class="benchmark-grid">
+      <div class="benchmark-box">
+        <div class="benchmark-box-title">Standard Lead</div>
+        <div class="benchmark-box-fields">Vorname, Nachname, E-Mail</div>
+        <div class="benchmark-ampel">
+          <span class="benchmark-pill green">&#9679; bis CHF 1.00</span>
+          <span class="benchmark-pill orange">&#9679; CHF 1.01 – 2.50</span>
+          <span class="benchmark-pill red">&#9679; ab CHF 2.51</span>
+        </div>
+      </div>
+      <div class="benchmark-box">
+        <div class="benchmark-box-title">Erweiterter Lead</div>
+        <div class="benchmark-box-fields">Vorname, Nachname, Adresse, PLZ, Ort, Telefonnummer, E-Mail</div>
+        <div class="benchmark-ampel">
+          <span class="benchmark-pill green">&#9679; bis CHF 4.00</span>
+          <span class="benchmark-pill orange">&#9679; CHF 4.01 – 7.00</span>
+          <span class="benchmark-pill red">&#9679; ab CHF 7.01</span>
+        </div>
+      </div>
+    </div>
   </div>
 
 </div>

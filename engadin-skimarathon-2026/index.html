@@ -356,6 +356,21 @@ main{padding:22px 32px 52px;}
 .back-btn.visible{display:flex;}
 
 @media(max-width:700px){.home-body{padding:16px;}.home-kpi-row{gap:8px;}.cmp-table{font-size:12px;}}
+/* BENCHMARK */
+.benchmark-bar{background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);padding:24px 28px 20px;margin:24px 24px 32px;}
+.benchmark-bar-title{font-size:13px;font-weight:800;color:var(--black);margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+.benchmark-bar-desc{font-size:11px;color:var(--mid);line-height:1.7;margin-bottom:14px;}
+.benchmark-bar-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:600px){.benchmark-bar-grid{grid-template-columns:1fr;}}
+.benchmark-bar-box{border:1px solid var(--border);border-radius:8px;padding:14px 16px;}
+.benchmark-bar-box.active{border-color:var(--red);border-width:2px;background:var(--red-light);}
+.benchmark-bar-box-title{font-size:10px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:var(--black);margin-bottom:2px;}
+.benchmark-bar-box-fields{font-size:10px;color:var(--grey);margin-bottom:10px;}
+.benchmark-bar-ampel{display:flex;gap:6px;flex-wrap:wrap;}
+.benchmark-bar-pill{font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;}
+.benchmark-bar-pill.green{background:#f0faf3;color:#15803d;}
+.benchmark-bar-pill.orange{background:#fff7ed;color:#b45309;}
+.benchmark-bar-pill.red{background:rgba(227,0,27,0.08);color:var(--red);}
 </style>
 </head>
 <body>
@@ -541,6 +556,35 @@ main{padding:22px 32px 52px;}
   <div class="tab-panel" id="tab-kantone"></div>
 </main>
 
+<!-- CPL BENCHMARK -->
+<div class="benchmark-bar">
+  <div class="benchmark-bar-title">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    CPL-Bewertung nach Leadtyp
+  </div>
+  <div class="benchmark-bar-desc">Die Ampelbewertung erfolgt differenziert nach Leadtyp. Diese Kampagne erfasst <strong>erweiterte Leads</strong>.</div>
+  <div class="benchmark-bar-grid">
+    <div class="benchmark-bar-box">
+      <div class="benchmark-bar-box-title">Standard Lead</div>
+      <div class="benchmark-bar-box-fields">Vorname, Nachname, E-Mail</div>
+      <div class="benchmark-bar-ampel">
+        <span class="benchmark-bar-pill green">&#9679; bis CHF 1.00</span>
+        <span class="benchmark-bar-pill orange">&#9679; CHF 1.01 – 2.50</span>
+        <span class="benchmark-bar-pill red">&#9679; ab CHF 2.51</span>
+      </div>
+    </div>
+    <div class="benchmark-bar-box active">
+      <div class="benchmark-bar-box-title">Erweiterter Lead</div>
+      <div class="benchmark-bar-box-fields">Vorname, Nachname, Adresse, PLZ, Ort, Telefonnummer, E-Mail</div>
+      <div class="benchmark-bar-ampel">
+        <span class="benchmark-bar-pill green">&#9679; bis CHF 4.00</span>
+        <span class="benchmark-bar-pill orange">&#9679; CHF 4.01 – 7.00</span>
+        <span class="benchmark-bar-pill red">&#9679; ab CHF 7.01</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ═══════════════════════════════════════════
    STATE — alle Werte zentral hier
@@ -724,8 +768,8 @@ function render() {
   const avgCPL = (totalSpend/totalLeads).toFixed(2);
   function cplClass(cpl) {
     if(cpl <= 0) return '';
-    if(cpl <= 0.45) return 'cpl-good';
-    if(cpl <= 1.15) return 'cpl-mid';
+    if(cpl <= 4.00) return 'cpl-good';
+    if(cpl <= 7.00) return 'cpl-mid';
     return 'cpl-bad';
   }
   setHTML('spend-table', `
