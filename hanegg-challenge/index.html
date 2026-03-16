@@ -382,6 +382,7 @@ main{padding:22px 32px 52px;}
     <button class="tab-btn active" data-tab="uebersicht">ÜBERSICHT</button>
     <button class="tab-btn" data-tab="kanal">LEADS &amp; KANAL</button>
     <button class="tab-btn" data-tab="kampagne">META-KAMPAGNE DETAIL</button>
+    <button class="tab-btn" data-tab="athleten">ATHLETEN</button>
     <button class="tab-btn" data-tab="learnings">LEARNINGS & NEXT STEPS</button>
   </div>
 </header>
@@ -464,6 +465,25 @@ main{padding:22px 32px 52px;}
     </div>
   </div>
 
+  <!-- ATHLETEN -->
+  <div class="tab-panel" id="tab-athleten">
+    <div class="kpi-row" id="kpi-athleten"></div>
+    <div class="grid-2">
+      <div class="card span-2">
+        <div class="card-title">Athleten-Ranking</div>
+        <div class="hbar-list" id="hbar-athletes"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Athleten-Verteilung</div>
+        <div style="position:relative;height:280px"><canvas id="chart-athletes"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Speed-Statistik</div>
+        <div class="kpi-row" id="kpi-speed" style="flex-direction:column;gap:8px;"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- LEARNINGS -->
   <div class="tab-panel" id="tab-learnings"></div>
 </main>
@@ -473,16 +493,33 @@ main{padding:22px 32px 52px;}
    STATE — alle Werte zentral hier
 ============================================= */
 let S = {
-  meta: { title: 'HANEGG-Challenge', stand: 'Stand März 2026' },
-  total: 0,
-  withPhone: 0, noPhone: 0, organic: 0,
-  broad: 0, de_total: 0, fr_total: 0,
+  meta: { title: 'HANEGG-Challenge', stand: 'Stand Januar 2026' },
+  total: 3854,
+  withPhone: 2417, noPhone: 1437, organic: 0,
+  broad: 3854, de_total: 3854, fr_total: 0,
 
-  source:  [],
-  content: [],
-  camp:    [],
-  campSpend: [],
-  adsets: [],
+  source:  [{l:'META Ads',v:3854}],
+  content: [{l:'Video Ad',v:2056},{l:'Image Ad',v:1798}],
+  camp:    [{l:'DE Broad',v:3854}],
+  campSpend: [
+    {l:'DE Broad', leads:3854, cpl:0.91, spend:3500},
+  ],
+  adsets: [
+    {l:'adset1-de-broad-videoad (08.01.2025)', impressions:252632, reach:159041, freq:1.59, cpm:5.84, clicks:7613, von:'08.01.2025', bis:'17.01.2026', days:10},
+    {l:'adset1-de-broad-imagead (08.01.2025)', impressions:1162124, reach:212883, freq:5.46, cpm:1.74, clicks:6656, von:'08.01.2025', bis:'17.01.2026', days:10},
+  ],
+  athletes: [
+    {l:'Marco Odermatt', v:1842},
+    {l:'Franjo von Allmen', v:1477},
+    {l:'Alexis Monney', v:172},
+    {l:'Niels Hintermann', v:134},
+    {l:'Stefan Rogentin', v:71},
+    {l:'Justin Murisier', v:54},
+    {l:'Marco Kohler', v:53},
+    {l:'Livio Hiltbrand', v:28},
+    {l:'Lars Rüsti', v:23},
+  ],
+  speedAvg: 145.3, speedMin: 100.0, speedMax: 165.0,
 };
 
 const RED = '#E3001B';
@@ -680,6 +717,9 @@ function render() {
     </div>`);
   animateFills(document.getElementById('defr-wrap'));
 
+  // -- ATHLETEN --
+  renderAthleten();
+
   // -- LEARNINGS --
   renderLearnings();
 
@@ -689,70 +729,105 @@ function render() {
   });
 }
 
+/* --- ATHLETEN TAB --- */
+function renderAthleten() {
+  const T = S.total || 1;
+  const ath = S.athletes || [];
+  const top = ath[0] || {l:'-',v:0};
+
+  // KPIs
+  setHTML('kpi-athleten', [
+    kpi(String(ath.length), 'Athleten', 'zur Auswahl im Game', true),
+    kpi(top.l, 'Beliebtester', fmt(top.v)+' Stimmen ('+pct(top.v,T)+'%)'),
+    kpi(S.speedAvg?.toFixed(1)+' km/h', 'Ø Speed', 'Geschätzte Geschwindigkeit'),
+    kpi(S.speedMin?.toFixed(0)+'–'+S.speedMax?.toFixed(0)+' km/h', 'Speed Range', 'Min – Max'),
+  ].join(''));
+
+  // Horizontal bars
+  const max = Math.max(...ath.map(d=>d.v),1);
+  setHTML('hbar-athletes', ath.map(d => {
+    const w = (d.v/max*100).toFixed(1);
+    return `<div class="hbar"><div class="hbar-label">${d.l}</div><div class="hbar-track"><div class="hbar-fill" style="width:${w}%"></div></div><div class="hbar-val">${fmt(d.v)} <span style="color:var(--grey);font-weight:400">(${pct(d.v,T)}%)</span></div></div>`;
+  }).join(''));
+
+  // Pie chart
+  renderDonutChart('chart-athletes', ath, T);
+
+  // Speed stats
+  setHTML('kpi-speed', `
+    <div style="padding:16px;">
+      <div style="margin-bottom:16px;">
+        <div style="font-size:11px;font-weight:700;color:var(--grey);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Durchschnitt</div>
+        <div style="font-size:32px;font-weight:900;color:var(--red);">${S.speedAvg?.toFixed(1)} km/h</div>
+      </div>
+      <div style="display:flex;gap:24px;">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--grey);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Minimum</div>
+          <div style="font-size:20px;font-weight:800;">${S.speedMin?.toFixed(1)} km/h</div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--grey);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Maximum</div>
+          <div style="font-size:20px;font-weight:800;">${S.speedMax?.toFixed(1)} km/h</div>
+        </div>
+      </div>
+    </div>
+  `);
+}
+
 /* --- helpers --- */
 function renderLearnings() {
   const T = S.total || 1;
-  const ig = S.source.find(d=>d.l==='Instagram')?.v||0;
-  const fb = S.source.find(d=>d.l==='Facebook')?.v||0;
-  const paidTotal = ig + fb;
   const bestContent = [...S.content].sort((a,b)=>b.v-a.v)[0];
-  const deBroad = S.camp.find(d=>d.l==='DE Broad')?.v||0;
-  const frBroad = S.camp.find(d=>d.l==='FR Broad')?.v||0;
-  const metaTotal = deBroad + frBroad;
+  const topAthlete = S.athletes?.[0] || {l:'-',v:0};
 
   const learnings = [
     {
       icon: '📸', color: 'red', badge: 'badge-red', tag: 'Creative Performance',
-      title: 'Creative-Varianten testen und Best Performer identifizieren',
-      text: `${bestContent ? bestContent.l : 'Bestes Creative'} ist aktuell der stärkste Content. Bildsprache und Format haben einen überproportionalen Einfluss auf die Lead-Rate.`
+      title: 'Video Ad als stärkstes Format',
+      text: `${bestContent ? bestContent.l : 'Bestes Creative'} generierte die meisten Klicks (${fmt(bestContent?.v||0)} Leads). Video-Content performt bei Game-Kampagnen besonders stark.`
     },
     {
-      icon: '📱', color: 'blue', badge: 'badge-blue', tag: 'Kanal-Allokation',
-      title: 'Kanal-Performance laufend auswerten',
-      text: `Instagram lieferte ${fmt(ig)} Leads (${pct(ig,Math.max(paidTotal,1))}% des Paid-Traffics) vs. ${fmt(fb)} auf Facebook. Die Kanal-Allokation sollte laufend optimiert werden.`
+      icon: '🏔️', color: 'blue', badge: 'badge-blue', tag: 'Athleten-Engagement',
+      title: 'Marco Odermatt als klarer Publikumsliebling',
+      text: `${topAthlete.l} wurde von ${fmt(topAthlete.v)} Teilnehmern gewählt (${pct(topAthlete.v,T)}%). Die Athleten-Auswahl ist ein starker Engagement-Treiber.`
     },
     {
-      icon: '🌍', color: 'teal', badge: 'badge-teal', tag: 'Sprachregionen',
-      title: 'FR-Markt gezielt bearbeiten',
-      text: `${fmt(frBroad)} Leads aus FR-Kampagnen (${pct(frBroad,T)}% aller META-Leads). Die Performance in der Romandie beobachten und ggf. Budget anpassen.`
-    },
-    {
-      icon: '🔄', color: 'purple', badge: 'badge-purple', tag: 'Skalierung',
-      title: 'DE/FR Budget-Split laufend optimieren',
-      text: `DE Broad lieferte ${fmt(deBroad)} Leads, FR Broad ${fmt(frBroad)} Leads. Der CPL in FR ist tiefer -- Potenzial für Budget-Verschiebung Richtung FR prüfen.`
+      icon: '💰', color: 'teal', badge: 'badge-teal', tag: 'Cost Efficiency',
+      title: 'CPL von CHF 0.91 im Zielbereich',
+      text: `Bei CHF 3'500 Ad Spend wurden ${fmt(S.total)} Leads generiert. Der CPL liegt im orangen Bereich -- Optimierungspotenzial bei Creative-Rotation.`
     },
     {
       icon: '📞', color: 'green', badge: 'badge-green', tag: 'Datenqualität',
-      title: 'Telefonnummer-Rate als Qualitätsindikator nutzen',
-      text: `${fmt(S.withPhone)} von ${fmt(S.total)} Leads (${pct(S.withPhone,T)}%) hinterliessen ihre Nummer -- ein Indikator für echtes Interesse und Kaufbereitschaft.`
+      title: 'Hohe Telefonnummer-Rate von 62.7%',
+      text: `${fmt(S.withPhone)} von ${fmt(S.total)} Leads (${pct(S.withPhone,T)}%) hinterliessen ihre Nummer -- ein starker Indikator für echtes Interesse und Kaufbereitschaft.`
     },
     {
-      icon: '⚡', color: 'red', badge: 'badge-red', tag: 'Owned Channels',
-      title: 'Organische Leads als kostenlosen Kanal stärken',
-      text: `${fmt(S.organic)} Leads (${pct(S.organic,T)}% aller Leads) entstanden ohne Paid-Touchpoint. Diese Stammzielgruppe kann als kostenloser Lead-Kanal weiter ausgebaut werden.`
+      icon: '🎿', color: 'purple', badge: 'badge-purple', tag: 'Game Mechanik',
+      title: 'Speed-Schätzung als Engagement-Element',
+      text: `Durchschnittlich geschätzte Geschwindigkeit: ${S.speedAvg?.toFixed(1)} km/h. Die Spanne von ${S.speedMin?.toFixed(0)}–${S.speedMax?.toFixed(0)} km/h zeigt hohes User-Engagement.`
     },
   ];
 
   const nextSteps = [
     {
-      icon: '🎯',
-      title: 'Kampagnen-Setup finalisieren',
-      desc: 'Zielgruppen, Budgets und Creatives für die HANEGG-Challenge definieren und im Ads Manager aufsetzen.'
-    },
-    {
       icon: '📸',
-      title: 'Creatives produzieren',
-      desc: 'Mehrere Image- und Video-Varianten erstellen. FR-spezifische Varianten von Beginn weg mitproduzieren.'
+      title: 'Mehr Creative-Varianten testen',
+      desc: 'Video Ad hat stärker performt als Image Ad. Weitere Video-Varianten produzieren und A/B-testen.'
     },
     {
-      icon: '📬',
-      title: 'Owned Channels aktivieren',
-      desc: 'Email-Marketing und Social-Kanäle als zusätzliche Lead-Quellen einsetzen, um den Paid-Anteil zu entlasten.'
+      icon: '🌍',
+      title: 'FR-Markt erschliessen',
+      desc: 'Kampagne lief nur auf DE. Für zukünftige Game-Kampagnen auch FR-Zielgruppen testen.'
+    },
+    {
+      icon: '📞',
+      title: 'Lead-Qualifizierung starten',
+      desc: 'Die 2\'417 Leads mit Telefonnummer für Outreach-Kampagnen und Sales-Aktivierung nutzen.'
     },
     {
       icon: '📊',
-      title: 'Monitoring & Optimierung',
-      desc: 'Laufend CPL, CTR und Kanal-Performance monitoren. Budget-Shifts basierend auf Echtzeit-Daten vornehmen.'
+      title: 'Athleten-Insights vertiefen',
+      desc: 'Die Athleten-Präferenz-Daten für zukünftige Kampagnen und Content-Strategie nutzen.'
     },
   ];
 
@@ -866,7 +941,10 @@ function renderBarChart(id, data, total) {
 
 
 /* -- CREATIVE IMAGES -- */
-const CREATIVE_IMGS = {};
+const CREATIVE_IMGS = {
+  'Video Ad': 'images/videoad.mp4',
+  'Image Ad': 'images/imagead.jpg',
+};
 
 const CREATIVE_ASPECT = {};
 
@@ -881,8 +959,11 @@ function buildContentCards() {
   container.innerHTML = '<div class="creative-grid">' + data.map(d => {
     const img   = CREATIVE_IMGS[d.l];
     const cls   = CREATIVE_ASPECT[d.l] || 'cc-img';
+    const isVideo = img && img.match(/\.(mp4|webm|mov)$/i);
     const imgEl = img
-      ? `<div class="cc-img-wrap" onclick="openLightbox(\`${d.l}\`)"><img src="${img}" class="${cls}" alt="${d.l}"></div>`
+      ? (isVideo
+        ? `<div class="cc-img-wrap"><video src="${img}" class="${cls}" muted loop playsinline onmouseenter="this.play()" onmouseleave="this.pause()"></video><div style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.6);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;">VIDEO</div></div>`
+        : `<div class="cc-img-wrap" onclick="openLightbox(\`${d.l}\`)"><img src="${img}" class="${cls}" alt="${d.l}"></div>`)
       : `<div class="cc-no-img">📊</div>`;
     const top   = isTop(d);
     const barW  = (d.v / max * 100).toFixed(1);
