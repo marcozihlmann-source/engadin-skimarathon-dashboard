@@ -294,6 +294,8 @@ main{padding:22px 32px 52px;}
 .cc-img-wrap{position:relative;cursor:zoom-in;overflow:hidden;}
 .cc-img-wrap::after{content:'';position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.45);color:#fff;font-size:13px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;}
 .cc-img-wrap:hover::after{opacity:1;}
+.cc-play-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.55);color:#fff;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;pointer-events:none;transition:background 0.2s;}
+.cc-img-wrap:hover .cc-play-icon{background:var(--red);}
 
 /* LIGHTBOX */
 .lightbox{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.25s;padding:24px;}
@@ -343,10 +345,9 @@ main{padding:22px 32px 52px;}
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
   <div class="lightbox-inner">
-    <button class="lightbox-close" onclick="closeLightbox()">
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 1l10 10M11 1L1 11" stroke="#333" stroke-width="2" stroke-linecap="round"/></svg>
-    </button>
-    <img id="lightbox-img" src="" alt="">
+    <button class="lightbox-close" onclick="closeLightbox(event)"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 3L3 11M3 3l8 8" stroke="#333" stroke-width="2" stroke-linecap="round"/></svg></button>
+    <img id="lightbox-img" src="" alt="" style="display:none;">
+    <video id="lightbox-video" src="" controls style="display:none;max-width:90vw;max-height:82vh;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,0.5);"></video>
     <div class="lightbox-caption" id="lightbox-caption"></div>
   </div>
 </div>
@@ -369,7 +370,7 @@ main{padding:22px 32px 52px;}
     </div>
     <div class="header-right">
       <div class="header-meta">
-        <span id="hdr-stand">Stand März 2026</span><br>
+        <span id="hdr-stand">Stand Juli 2025</span> · <span style="font-size:11px;color:var(--grey)">27. Jun – 20. Jul 2025</span><br>
         <strong id="hdr-total">0 Leads</strong>
       </div>
       <button class="edit-btn" id="editBtn" onclick="openEdit()">
@@ -396,7 +397,7 @@ main{padding:22px 32px 52px;}
         <div class="donuts-row" id="donuts-row"></div>
       </div>
       <div class="card">
-        <div class="card-title">Gender-Verteilung</div>
+        <div class="card-title">Sprachregionen-Split</div>
         <div style="position:relative;height:205px"><canvas id="chart-roles"></canvas></div>
       </div>
       <div class="card">
@@ -404,7 +405,7 @@ main{padding:22px 32px 52px;}
         <div style="position:relative;height:205px"><canvas id="chart-lang"></canvas></div>
       </div>
       <div class="card">
-        <div class="card-title">Gender-Split</div>
+        <div class="card-title">DE / FR Verteilung</div>
         <div class="phone-bars" id="phone-bars"></div>
       </div>
     </div>
@@ -473,16 +474,28 @@ main{padding:22px 32px 52px;}
    STATE — alle Werte zentral hier
 ============================================= */
 let S = {
-  meta: { title: 'Summer Kollektion', stand: 'Stand März 2026' },
-  total: 0,
-  male: 0, female: 0, organic: 0,
-  broad: 0, de_total: 0, fr_total: 0,
+  meta: { title: 'Summer Kollektion', stand: 'Stand Juli 2025' },
+  total: 2152,
+  de_total: 593, fr_total: 1559, organic: 0,
+  broad: 2152,
+  dataType: 'email',
 
-  source:  [],
-  content: [],
-  camp:    [],
-  campSpend: [],
-  adsets: [],
+  source: [{l:'META Ads',v:2152}],
+  content: [
+    {l:'FR Broad Video (27.06)',v:830},
+    {l:'FR Broad Image (27.06)',v:787},
+    {l:'DE Broad Image (27.06)',v:494},
+    {l:'DE Broad Video (27.06)',v:106},
+  ],
+  camp: [{l:'FR Broad',v:1559},{l:'DE Broad',v:593}],
+  campSpend: [
+    {l:'FR Broad (adset2-fr)', leads:1617, cpl:0.37, spend:598.05},
+    {l:'DE Broad (adset1-de)', leads:600, cpl:0.29, spend:176.11},
+  ],
+  adsets: [
+    {l:'adset2-fr-broad (27.06.2025)', impressions:111659, reach:31625, freq:3.32, cpm:5.70, clicks:2340, von:'27.06.2025', bis:'20.07.2025', days:23},
+    {l:'adset1-de-broad (27.06.2025)', impressions:26208, reach:9544, freq:2.60, cpm:7.11, clicks:806, von:'27.06.2025', bis:'20.07.2025', days:23},
+  ],
 };
 
 const RED = '#E3001B';
@@ -504,11 +517,11 @@ function render() {
 
   // -- ÜBERSICHT KPIs --
   setHTML('kpi-uebersicht', [
-    kpi(fmt(S.total),      'Total Leads',       'Alle Leads gesamt', true),
-    kpi(fmt(S.female),'Weiblich', pct(S.female,T)+'% aller Leads'),
-    kpi(fmt(S.male),'Männlich', pct(S.male,T)+'% aller Leads'),
-    kpi(fmt(S.de_total),   'DE Leads',        pct(S.de_total,T)+'% aller Leads'),
-    kpi(fmt(S.fr_total),   'FR Leads',        pct(S.fr_total,T)+'% aller Leads'),
+    kpi(fmt(S.total), 'Total Leads', 'Alle Leads gesamt', true),
+    kpi(fmt(S.fr_total), 'FR Leads', pct(S.fr_total,T)+'% aller Leads'),
+    kpi(fmt(S.de_total), 'DE Leads', pct(S.de_total,T)+'% aller Leads'),
+    kpi('CHF 0.35', 'Ø CPL', 'Cost per Lead (META)'),
+    kpi(fmt(3146), 'Link-Klicks', 'CTR 2.43%'),
   ].join(''));
 
   // Donuts
@@ -516,34 +529,36 @@ function render() {
 
   // Charts
   renderDonutChart('chart-roles',
-    [{l:'Weiblich',v:S.female},{l:'Männlich',v:S.male}], T);
+    [{l:'Deutsch (DE)',v:S.de_total},{l:'Français (FR)',v:S.fr_total}], T);
   renderDonutChart('chart-lang',
-    [{l:'Deutsch',v:S.de_total||Math.round(T*0.75)},{l:'Français',v:S.fr_total||Math.round(T*0.25)}], T);
-  // Gender bars
+    [{l:'Deutsch',v:S.de_total},{l:'Français',v:S.fr_total}], T);
+  // DE/FR bars
   setHTML('phone-bars', `
     <div class="phone-bar-row">
-      <div class="phone-bar-head">Weiblich <span>${pct(S.female,T)}%</span></div>
-      <div class="phone-track"><div class="phone-fill" style="background:var(--red)" data-w="${pct(S.female,T)}"></div></div>
-      <div class="phone-sub">${fmt(S.female)} Leads</div>
+      <div class="phone-bar-head">Deutsch (DE) <span>${pct(S.de_total,T)}%</span></div>
+      <div class="phone-track"><div class="phone-fill" style="background:var(--red)" data-w="${pct(S.de_total,T)}"></div></div>
+      <div class="phone-sub">${fmt(S.de_total)} Leads</div>
     </div>
     <div class="phone-bar-row">
-      <div class="phone-bar-head">Männlich <span>${pct(S.male,T)}%</span></div>
-      <div class="phone-track"><div class="phone-fill" style="background:#888" data-w="${pct(S.male,T)}"></div></div>
-      <div class="phone-sub">${fmt(S.male)} Leads</div>
+      <div class="phone-bar-head">Français (FR) <span>${pct(S.fr_total,T)}%</span></div>
+      <div class="phone-track"><div class="phone-fill" style="background:#888" data-w="${pct(S.fr_total,T)}"></div></div>
+      <div class="phone-sub">${fmt(S.fr_total)} Leads</div>
     </div>
     <div class="outreach-box">
-      <div class="ol">Grösste Zielgruppe</div>
-      <div class="ov">${fmt(S.female)}</div>
-      <div class="os">Weibliche Leads</div>
+      <div class="ol">Nur E-Mail Leads</div>
+      <div class="ov">${fmt(S.total)}</div>
+      <div class="os">Kein Telefon / Gender erfasst</div>
     </div>`);
   animateFills(document.getElementById('phone-bars'));
 
   // -- KANAL KPIs --
-  const metaAds = S.source.find(d=>d.l==='META Ads')?.v||S.total;
+  const totalClicks = S.adsets.reduce((s,d)=>s+d.clicks,0);
+  const totalSpendKanal = S.campSpend.reduce((s,d)=>s+d.spend,0);
+  const cpc = totalClicks > 0 ? (totalSpendKanal/totalClicks).toFixed(2) : '0.00';
   setHTML('kpi-kanal', [
-    kpi(fmt(metaAds), 'META Ads',       '100% aller Leads', true),
-    kpi("12'020", 'Link-Klicks',        'Total Klicks auf Anzeigen'),
-    kpi('CHF 0.36', 'CPC',              'CHF 4\'343.52 / 12\'020 Klicks'),
+    kpi(fmt(S.total), 'META Ads', '100% aller Leads', true),
+    kpi(fmt(totalClicks), 'Link-Klicks', 'CTR 2.43%'),
+    kpi('CHF '+cpc, 'CPC', 'Cost per Click'),
   ].join(''));
 
   buildHBars('hbar-source',  S.source,  T);
@@ -556,17 +571,17 @@ function render() {
     <div class="bv">${best.l} -- ${fmt(best.v)} Leads</div>
     <div class="bs">${pct(best.v,T)}% aller Leads via einem einzigen Creative</div>`);
 
-  const paid = [{l:'Paid Social (META Ads)',v:metaAds}];
+  const paid = [{l:'Paid Social (META Ads)',v:S.total}];
   buildPaidBars(paid);
   setHTML('paid-insights', [
     ins('Paid Social Anteil',   '100%'),
-    ins('DE-Anteil',            pct(S.de_total,T)+'%'),
+    ins('FR-Anteil',            pct(S.fr_total,T)+'%'),
     ins('Best Creative Anteil', pct(best.v,T)+'%'),
   ].join(''));
 
   // -- KAMPAGNE KPIs --
-  const deBroad = S.camp.find(d=>d.l==='DE Broad')?.v||0;
-  const frBroad = S.camp.find(d=>d.l==='FR Broad')?.v||0;
+  const deBroad = S.camp.find(d=>d.l.startsWith('DE'))?.v||0;
+  const frBroad = S.camp.find(d=>d.l.startsWith('FR'))?.v||0;
   const totalMetaSpend = S.campSpend.reduce((s,d)=>s+d.spend,0);
   const totalMetaLeads = S.campSpend.reduce((s,d)=>s+d.leads,0);
   const avgCPLAll = totalMetaLeads > 0 ? (totalMetaSpend/totalMetaLeads).toFixed(2) : '0.00';
@@ -671,8 +686,8 @@ function render() {
       <div class="defr-bar"><div class="defr-head"><span>Broad</span><span>${fmt(frBroad)}</span></div><div class="defr-track"><div class="defr-fill" style="background:#BBBBBB" data-w="${pct(frBroad,T)}"></div></div></div>
     </div>
     <div class="defr-insights">
-      ${ins('Breiteste Kampagne','DE Broad -- '+fmt(deBroad))}
-      ${ins('FR Broad Anteil',    pct(frBroad,T)+'% aller Leads')}
+      ${ins('Stärkste Region','FR Broad -- '+fmt(frBroad))}
+      ${ins('FR Anteil',          pct(frBroad,T)+'% aller Leads')}
       ${ins('DE-Anteil gesamt',   pct(S.de_total,T)+'%')}
     </div>`);
   animateFills(document.getElementById('defr-wrap'));
@@ -690,62 +705,60 @@ function render() {
 function renderLearnings() {
   const T = S.total || 1;
   const bestContent = [...S.content].sort((a,b)=>b.v-a.v)[0];
-  const deBroad = S.camp.find(d=>d.l==='DE Broad')?.v||0;
-  const frBroad = S.camp.find(d=>d.l==='FR Broad')?.v||0;
 
   const learnings = [
     {
-      icon: '📸', color: 'red', badge: 'badge-red', tag: 'Creative Performance',
-      title: 'Erste Image Ads deutlich stärker als Nachzügler',
-      text: `${bestContent ? bestContent.l : 'Bestes Creative'} generierte ${bestContent ? fmt(bestContent.v) : '0'} Leads (${bestContent ? pct(bestContent.v,T) : '0'}%). Die früh geschalteten Ads hatten klaren Vorsprung -- Timing ist entscheidend für die Performance.`
-    },
-    {
-      icon: '🌍', color: 'teal', badge: 'badge-teal', tag: 'Sprachregionen',
-      title: 'DE/FR-Split: 83% vs. 17%',
-      text: `${fmt(deBroad)} Leads aus DE-Kampagnen vs. ${fmt(frBroad)} aus FR. Der DE-Markt dominiert klar, FR zeigt aber soliden CPL (CHF 0.57) und Skalierungspotenzial.`
-    },
-    {
-      icon: '👩', color: 'purple', badge: 'badge-purple', tag: 'Gender-Insight',
-      title: 'Weibliche Zielgruppe überproportional stark',
-      text: `${fmt(S.female)} weibliche Leads (${pct(S.female,T)}%) vs. ${fmt(S.male)} männliche (${pct(S.male,T)}%). Die Summer Kollektion spricht Frauen stärker an -- Creatives und Messaging entsprechend optimieren.`
+      icon: '🇫🇷', color: 'red', badge: 'badge-red', tag: 'Markt-Insight',
+      title: 'FR-Markt dominiert mit 72.4% aller Leads',
+      text: 'Überraschend starke Performance im französischsprachigen Markt mit 1\'559 von 2\'152 Leads. FR sollte als primärer Zielmarkt für Summer-Produkte priorisiert werden.'
     },
     {
       icon: '💰', color: 'green', badge: 'badge-green', tag: 'Effizienz',
-      title: 'Sehr tiefer CPL unter CHF 0.60',
-      text: `Durchschnittlicher CPL von CHF 0.56 bei Total-Spend von CHF 4\'343.52. Beide Kampagnen (DE: CHF 0.55, FR: CHF 0.57) liefern effizient.`
+      title: 'Extrem tiefer CPL von CHF 0.35 -- effizienteste Kampagne bisher',
+      text: 'Mit einem durchschnittlichen Cost per Lead von nur CHF 0.35 ist die Summer Kollektion die bisher kosteneffizienteste Lead-Kampagne.'
     },
     {
-      icon: '🔄', color: 'blue', badge: 'badge-blue', tag: 'Skalierung',
-      title: 'Zweite Welle Ads mit tieferem CPM',
-      text: `Die am 26.11. gestarteten Ads zeigten tiefere CPMs (DE: 8.19, FR: 9.47) als die Erstschaltung. Gestaffelte Launches können die Gesamteffizienz steigern.`
+      icon: '🎬', color: 'blue', badge: 'badge-blue', tag: 'Creative Performance',
+      title: 'Video und Image Ads nahezu gleichstark in FR (830 vs 787)',
+      text: 'Im FR-Markt performen Video und Image Ads fast identisch. Beide Formate sollten weiter eingesetzt werden, um maximale Reichweite zu erzielen.'
     },
     {
-      icon: '⚡', color: 'red', badge: 'badge-red', tag: 'Reichweite',
-      title: 'Über 200\'000 Personen erreicht',
-      text: `Total Reach über alle Adsets von rund 205\'000 Personen. Die Frequenz lag bei moderaten 2.0--2.7, was auf gesunde Ausspielung ohne Übersättigung hindeutet.`
+      icon: '📸', color: 'purple', badge: 'badge-purple', tag: 'DE-Insight',
+      title: 'DE Image Ad (494) deutlich stärker als DE Video (106)',
+      text: 'Im Gegensatz zu FR zeigt sich in DE ein klarer Vorteil für Image Ads. DE Video erzielte nur 106 Leads -- Image Ads sind im DE-Markt das stärkere Format.'
+    },
+    {
+      icon: '⚡', color: 'teal', badge: 'badge-teal', tag: 'Engagement',
+      title: 'Hohe CTR von 2.43% zeigt starkes Audience-Interest',
+      text: 'Die Click-Through-Rate von 2.43% liegt deutlich über dem Branchendurchschnitt und zeigt hohes Interesse der Zielgruppe an der Summer Kollektion.'
+    },
+    {
+      icon: '🏆', color: 'green', badge: 'badge-green', tag: 'Budget-Effizienz',
+      title: 'Nur CHF 774 Spend für 2\'152 Leads',
+      text: 'Herausragendes Preis-Leistungs-Verhältnis: Mit weniger als CHF 800 Gesamtbudget wurden über 2\'100 qualifizierte E-Mail-Leads generiert.'
     },
   ];
 
   const nextSteps = [
     {
-      icon: '🎯',
-      title: 'Lead-Daten auswerten & segmentieren',
-      desc: 'Gender- und Sprachdaten nutzen, um Zielgruppen-Segmente für Follow-up-Kampagnen zu bilden.'
+      icon: '🇫🇷',
+      title: 'FR-Markt priorisieren',
+      desc: 'FR-Markt als primären Zielmarkt für Summer-Produkte priorisieren.'
     },
     {
-      icon: '📬',
+      icon: '📧',
       title: 'E-Mail Follow-up starten',
-      desc: 'Personalisierte E-Mail-Sequenzen an die 7\'840 Leads versenden -- DE und FR getrennt, mit Gender-spezifischem Messaging.'
+      desc: 'E-Mail Follow-up an 2\'152 Leads -- FR/DE getrennt.'
+    },
+    {
+      icon: '🎬',
+      title: 'Video-Content in FR pushen',
+      desc: 'Video-Content in FR weiter pushen (830 Leads, best performer).'
     },
     {
       icon: '📸',
-      title: 'Creative Learnings übertragen',
-      desc: 'Die Erkenntnisse zu Image Ad Performance und Timing auf zukünftige Kampagnen (z.B. Neujahrs-Aktionen) anwenden.'
-    },
-    {
-      icon: '📊',
-      title: 'ROI-Analyse & Reporting',
-      desc: 'Conversion-Rate der Leads tracken und den Return on Ad Spend der Summer Kollektion Kampagne berechnen.'
+      title: 'DE Image Ads optimieren',
+      desc: 'DE Image Ads optimieren (Image > Video in DE).'
     },
   ];
 
@@ -802,7 +815,7 @@ function renderDonuts() {
   const T = S.total || 1;
   const items = [
     {id:'d-leads', pct:100, label:'Total Leads', val:S.total},
-    {id:'d-tel',   pct:+pct(S.female,T), label:'Weiblich', val:S.female},
+    {id:'d-tel',   pct:+pct(S.fr_total,T), label:'FR Leads', val:S.fr_total},
   ];
   const CIRC = 2*Math.PI*44;
   setHTML('donuts-row', items.map(it=>`
@@ -859,7 +872,17 @@ function renderBarChart(id, data, total) {
 
 
 /* -- CREATIVE IMAGES -- */
-const CREATIVE_IMGS = {};
+const CREATIVE_IMGS = {
+  'FR Broad Video (27.06)': 'images/27062025-adset2-fr-broad-videoad_preview.png',
+  'FR Broad Image (27.06)': 'images/27062025-adset2-fr-broad-imagead.png',
+  'DE Broad Image (27.06)': 'images/27062025-adset1-de-broad-imagead.png',
+  'DE Broad Video (27.06)': 'images/27062025-adset1-de-broad-videoad.png',
+};
+
+const CREATIVE_VIDEOS = {
+  'FR Broad Video (27.06)': 'images/videoad_ad_fr.mov',
+  'DE Broad Video (27.06)': 'images/videoad_ad_de.mov',
+};
 
 const CREATIVE_ASPECT = {};
 
@@ -874,8 +897,12 @@ function buildContentCards() {
   container.innerHTML = '<div class="creative-grid">' + data.map(d => {
     const img   = CREATIVE_IMGS[d.l];
     const cls   = CREATIVE_ASPECT[d.l] || 'cc-img';
+    const hasVideo = CREATIVE_VIDEOS && CREATIVE_VIDEOS[d.l];
     const imgEl = img
-      ? `<div class="cc-img-wrap" onclick="openLightbox(\`${d.l}\`)"><img src="${img}" class="${cls}" alt="${d.l}"></div>`
+      ? `<div class="cc-img-wrap" onclick="openLightbox(\`${d.l}\`)">
+          <img src="${img}" class="${cls}" alt="${d.l}">
+          ${hasVideo ? '<div class="cc-play-icon">▶</div>' : ''}
+        </div>`
       : `<div class="cc-no-img">📊</div>`;
     const top   = isTop(d);
     const barW  = (d.v / max * 100).toFixed(1);
@@ -971,10 +998,10 @@ function buildEditPanel() {
     <div class="ep-section-title">Übersicht -- Hauptzahlen</div>
     <div class="ep-row">
       <div class="ep-field"><label>Total Leads</label><input type="number" data-key="total" value="${S.total}"></div>
-      <div class="ep-field"><label>Weiblich</label><input type="number" data-key="female" value="${S.female}"></div>
     </div>
     <div class="ep-row">
-      <div class="ep-field"><label>Männlich</label><input type="number" data-key="male" value="${S.male}"></div>
+      <div class="ep-field"><label>DE Leads</label><input type="number" data-key="de_total" value="${S.de_total}"></div>
+      <div class="ep-field"><label>FR Leads</label><input type="number" data-key="fr_total" value="${S.fr_total}"></div>
     </div>
   </div>
 
@@ -1067,8 +1094,24 @@ render();
 /* -- LIGHTBOX -- */
 function openLightbox(label) {
   const img = CREATIVE_IMGS[label];
-  if (!img) return;
-  document.getElementById('lightbox-img').src = img;
+  const video = CREATIVE_VIDEOS ? CREATIVE_VIDEOS[label] : null;
+  if (!img && !video) return;
+
+  const imgEl = document.getElementById('lightbox-img');
+  const videoEl = document.getElementById('lightbox-video');
+
+  if (video) {
+    imgEl.style.display = 'none';
+    videoEl.style.display = 'block';
+    videoEl.src = video;
+    videoEl.play();
+  } else {
+    videoEl.style.display = 'none';
+    videoEl.pause();
+    imgEl.style.display = 'block';
+    imgEl.src = img;
+  }
+
   document.getElementById('lightbox-caption').textContent = label;
   document.getElementById('lightbox').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -1077,6 +1120,8 @@ function closeLightbox(e) {
   if (e && e.target !== document.getElementById('lightbox') && !e.target.closest('.lightbox-close')) return;
   document.getElementById('lightbox').classList.remove('open');
   document.body.style.overflow = '';
+  const videoEl = document.getElementById('lightbox-video');
+  if (videoEl) { videoEl.pause(); videoEl.src = ''; }
 }
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeLightbox({target:document.getElementById('lightbox')}); });
 
