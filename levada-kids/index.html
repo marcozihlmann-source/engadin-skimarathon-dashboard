@@ -313,6 +313,13 @@ main{padding:22px 32px 52px;}
 .back-btn{display:none;align-items:center;gap:6px;background:none;border:1.5px solid var(--border);border-radius:7px;padding:6px 12px;font-family:inherit;font-size:12px;font-weight:700;color:var(--mid);cursor:pointer;transition:all 0.15s;white-space:nowrap;}
 .back-btn:hover{border-color:var(--red);color:var(--red);}
 .back-btn.visible{display:flex;}
+
+/* CAMPAIGN SWITCHER */
+.campaign-switcher{display:flex;gap:0;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;margin-left:8px;}
+.campaign-switch-btn{background:none;border:none;padding:7px 16px;font-family:inherit;font-size:11px;font-weight:700;letter-spacing:0.04em;cursor:pointer;color:var(--grey);transition:all 0.2s;white-space:nowrap;}
+.campaign-switch-btn:not(:last-child){border-right:1.5px solid var(--border);}
+.campaign-switch-btn.active{background:var(--red);color:#fff;}
+.campaign-switch-btn:hover:not(.active){background:var(--bg);color:var(--black);}
 </style>
 </head>
 <body>
@@ -366,6 +373,10 @@ main{padding:22px 32px 52px;}
         <h1 id="hdr-title">Levada Kids Kollektion</h1>
       </div>
       <div class="header-sub">Recruiting Campaign · Lead Dashboard</div>
+      <div class="campaign-switcher" id="campaignSwitcher">
+        <button class="campaign-switch-btn active" data-campaign="recruiting">Recruiting</button>
+        <button class="campaign-switch-btn" data-campaign="leadgen">LeadGen</button>
+      </div>
     </div>
     <div class="header-right">
       <div class="header-meta">
@@ -472,31 +483,56 @@ main{padding:22px 32px 52px;}
 /* =============================================
    STATE — alle Werte zentral hier
 ============================================= */
-let S = {
-  meta: { title: 'Levada Kids Kollektion', stand: 'Stand August 2025' },
-  total: 822,
-  withPhone: 809, noPhone: 13, organic: 117,
-  broad: 822, de_total: 529, fr_total: 293,
-
-  source: [
-    {l:'Paid Instagram',v:259},
-    {l:'Email / Newsletter',v:244},
-    {l:'Paid Facebook',v:202},
-    {l:'Organic',v:83},
-    {l:'Organic Instagram',v:18},
-    {l:'Organic Facebook',v:16},
-  ],
-  content: [{l:'Image Ad DE (20.08)',v:297},{l:'Image Ad FR (20.08)',v:199},{l:'Newsletter DE',v:131},{l:'Story',v:26},{l:'Organic / Direct',v:169}],
-  camp: [{l:'DE Broad (Paid)',v:297},{l:'FR Broad (Paid)',v:199},{l:'Newsletter',v:157},{l:'Organic / Direct',v:169}],
-  campSpend: [
-    {l:'DE Broad (adset1-de)', leads:314, cpl:6.13, spend:1924.80},
-    {l:'FR Broad (adset2-fr)', leads:200, cpl:5.38, spend:1075.20},
-  ],
-  adsets: [
-    {l:'adset1-de (20.08.2025)', impressions:152486, reach:59350, freq:2.57, cpm:12.62, clicks:3879, von:'20.08.2025', bis:'27.08.2025', days:7},
-    {l:'adset2-fr (20.08.2025)', impressions:105019, reach:38071, freq:2.76, cpm:10.24, clicks:1740, von:'20.08.2025', bis:'27.08.2025', days:7},
-  ],
+const CAMPAIGNS = {
+  recruiting: {
+    meta: { title: 'Levada Kids Kollektion', stand: 'Stand August 2025', subtitle: 'Recruiting Campaign · Lead Dashboard', period: '20. – 27. Aug 2025' },
+    total: 822,
+    withPhone: 809, noPhone: 13, organic: 117,
+    male: 0, female: 0,
+    broad: 822, de_total: 529, fr_total: 293,
+    dataType: 'phone',
+    source: [
+      {l:'Paid Instagram',v:259},
+      {l:'Email / Newsletter',v:244},
+      {l:'Paid Facebook',v:202},
+      {l:'Organic',v:83},
+      {l:'Organic Instagram',v:18},
+      {l:'Organic Facebook',v:16},
+    ],
+    content: [{l:'Image Ad DE (20.08)',v:297},{l:'Image Ad FR (20.08)',v:199},{l:'Newsletter DE',v:131},{l:'Story',v:26},{l:'Organic / Direct',v:169}],
+    camp: [{l:'DE Broad (Paid)',v:297},{l:'FR Broad (Paid)',v:199},{l:'Newsletter',v:157},{l:'Organic / Direct',v:169}],
+    campSpend: [
+      {l:'DE Broad (adset1-de)', leads:314, cpl:6.13, spend:1924.80},
+      {l:'FR Broad (adset2-fr)', leads:200, cpl:5.38, spend:1075.20},
+    ],
+    adsets: [
+      {l:'adset1-de (20.08.2025)', impressions:152486, reach:59350, freq:2.57, cpm:12.62, clicks:3879, von:'20.08.2025', bis:'27.08.2025', days:7},
+      {l:'adset2-fr (20.08.2025)', impressions:105019, reach:38071, freq:2.76, cpm:10.24, clicks:1740, von:'20.08.2025', bis:'27.08.2025', days:7},
+    ],
+  },
+  leadgen: {
+    meta: { title: 'Levada Kids Kollektion', stand: 'Stand November 2025', subtitle: 'LeadGen Campaign · Lead Dashboard', period: '31. Okt – 26. Nov 2025' },
+    total: 969,
+    withPhone: 0, noPhone: 0, organic: 0,
+    male: 205, female: 764,
+    broad: 969, de_total: 700, fr_total: 269,
+    dataType: 'gender',
+    source: [{l:'META Ads',v:969}],
+    content: [{l:'Image Ad DE (31.10)',v:702},{l:'Video Ad FR (31.10)',v:269}],
+    camp: [{l:'DE Broad',v:700},{l:'FR Broad',v:269}],
+    campSpend: [
+      {l:'DE Broad (adset1-de)', leads:702, cpl:0.64, spend:447.75},
+      {l:'FR Broad (adset2-fr)', leads:269, cpl:0.77, spend:208.45},
+    ],
+    adsets: [
+      {l:'adset1-de-imagead (31.10.2025)', impressions:42597, reach:23400, freq:1.82, cpm:10.51, clicks:1197, von:'31.10.2025', bis:'26.11.2025', days:26},
+      {l:'adset2-fr-videoad (31.10.2025)', impressions:24785, reach:13723, freq:1.81, cpm:8.41, clicks:531, von:'31.10.2025', bis:'26.11.2025', days:26},
+    ],
+  }
 };
+
+let currentCampaign = 'recruiting';
+let S = JSON.parse(JSON.stringify(CAMPAIGNS.recruiting));
 
 const RED = '#E3001B';
 const PIE_COLS = [RED,'#FF4D63','#FF8A96','#CC001A','#AAAAAA','#CCCCCC','#DDDDDD'];
@@ -512,54 +548,107 @@ function render() {
 
   // Header
   document.getElementById('hdr-title').textContent = S.meta.title;
-  document.getElementById('hdr-stand').textContent = S.meta.stand;
-  document.getElementById('hdr-total').textContent = fmt(S.total) + ' Leads';
+  document.querySelector('.header-sub').textContent = S.meta.subtitle;
+  document.querySelector('#hdr-stand').parentNode.innerHTML = `<span id="hdr-stand">${S.meta.stand}</span> · ${S.meta.period}<br><strong id="hdr-total">${fmt(S.total)} Leads</strong>`;
 
   // -- ÜBERSICHT KPIs --
-  setHTML('kpi-uebersicht', [
-    kpi(fmt(S.total),      'Total Leads',       'Alle Leads gesamt', true),
-    kpi(fmt(S.withPhone),'Mit Telefonnummer', pct(S.withPhone,T)+'% aller Leads'),
-    kpi(fmt(S.noPhone),'Ohne Telefonnummer', pct(S.noPhone,T)+'% aller Leads'),
-    kpi(fmt(S.de_total),   'DE Leads',        pct(S.de_total,T)+'% aller Leads'),
-    kpi(fmt(S.fr_total),   'FR Leads',        pct(S.fr_total,T)+'% aller Leads'),
-  ].join(''));
+  const overviewKpis = [
+    kpi(fmt(S.total), 'Total Leads', 'Alle Leads gesamt', true),
+  ];
+  if (S.dataType === 'phone') {
+    overviewKpis.push(
+      kpi(fmt(S.withPhone),'Mit Telefonnummer', pct(S.withPhone,T)+'% aller Leads'),
+      kpi(fmt(S.noPhone),'Ohne Telefonnummer', pct(S.noPhone,T)+'% aller Leads'),
+    );
+  } else {
+    overviewKpis.push(
+      kpi(fmt(S.female),'Weiblich', pct(S.female,T)+'% aller Leads'),
+      kpi(fmt(S.male),'Männlich', pct(S.male,T)+'% aller Leads'),
+    );
+  }
+  overviewKpis.push(
+    kpi(fmt(S.de_total), 'DE Leads', pct(S.de_total,T)+'% aller Leads'),
+    kpi(fmt(S.fr_total), 'FR Leads', pct(S.fr_total,T)+'% aller Leads'),
+  );
+  setHTML('kpi-uebersicht', overviewKpis.join(''));
 
   // Donuts
   renderDonuts();
 
   // Charts
-  renderDonutChart('chart-roles',
-    [{l:'Mit Telefonnummer',v:S.withPhone},{l:'Ohne Telefonnummer',v:S.noPhone}], T);
+  if (S.dataType === 'phone') {
+    renderDonutChart('chart-roles',
+      [{l:'Mit Telefonnummer',v:S.withPhone},{l:'Ohne Telefonnummer',v:S.noPhone}], T);
+  } else {
+    renderDonutChart('chart-roles',
+      [{l:'Weiblich',v:S.female},{l:'Männlich',v:S.male}], T);
+  }
   renderDonutChart('chart-lang',
     [{l:'Deutsch',v:S.de_total||Math.round(T*0.75)},{l:'Français',v:S.fr_total||Math.round(T*0.25)}], T);
-  // Phone bars
-  setHTML('phone-bars', `
-    <div class="phone-bar-row">
-      <div class="phone-bar-head">Mit Telefonnummer <span>${pct(S.withPhone,T)}%</span></div>
-      <div class="phone-track"><div class="phone-fill" style="background:var(--red)" data-w="${pct(S.withPhone,T)}"></div></div>
-      <div class="phone-sub">${fmt(S.withPhone)} Leads</div>
-    </div>
-    <div class="phone-bar-row">
-      <div class="phone-bar-head">Ohne Telefonnummer <span>${pct(S.noPhone,T)}%</span></div>
-      <div class="phone-track"><div class="phone-fill" style="background:#888" data-w="${pct(S.noPhone,T)}"></div></div>
-      <div class="phone-sub">${fmt(S.noPhone)} Leads</div>
-    </div>
-    <div class="outreach-box">
-      <div class="ol">Qualifiziert für Outreach</div>
-      <div class="ov">${fmt(S.withPhone)}</div>
-      <div class="os">Leads mit Telefonnummer</div>
-    </div>`);
+
+  // Phone/Gender bars
+  if (S.dataType === 'phone') {
+    document.getElementById('chart-roles').closest('.card').querySelector('.card-title').textContent = 'Telefonnummer-Qualität';
+    document.getElementById('phone-bars').closest('.card').querySelector('.card-title').textContent = 'Telefon-Qualität der Leads';
+    setHTML('phone-bars', `
+      <div class="phone-bar-row">
+        <div class="phone-bar-head">Mit Telefonnummer <span>${pct(S.withPhone,T)}%</span></div>
+        <div class="phone-track"><div class="phone-fill" style="background:var(--red)" data-w="${pct(S.withPhone,T)}"></div></div>
+        <div class="phone-sub">${fmt(S.withPhone)} Leads</div>
+      </div>
+      <div class="phone-bar-row">
+        <div class="phone-bar-head">Ohne Telefonnummer <span>${pct(S.noPhone,T)}%</span></div>
+        <div class="phone-track"><div class="phone-fill" style="background:#888" data-w="${pct(S.noPhone,T)}"></div></div>
+        <div class="phone-sub">${fmt(S.noPhone)} Leads</div>
+      </div>
+      <div class="outreach-box">
+        <div class="ol">Qualifiziert für Outreach</div>
+        <div class="ov">${fmt(S.withPhone)}</div>
+        <div class="os">Leads mit Telefonnummer</div>
+      </div>`);
+  } else {
+    document.getElementById('chart-roles').closest('.card').querySelector('.card-title').textContent = 'Gender-Verteilung';
+    document.getElementById('phone-bars').closest('.card').querySelector('.card-title').textContent = 'Gender-Split';
+    setHTML('phone-bars', `
+      <div class="phone-bar-row">
+        <div class="phone-bar-head">Weiblich <span>${pct(S.female,T)}%</span></div>
+        <div class="phone-track"><div class="phone-fill" style="background:var(--red)" data-w="${pct(S.female,T)}"></div></div>
+        <div class="phone-sub">${fmt(S.female)} Leads</div>
+      </div>
+      <div class="phone-bar-row">
+        <div class="phone-bar-head">Männlich <span>${pct(S.male,T)}%</span></div>
+        <div class="phone-track"><div class="phone-fill" style="background:#888" data-w="${pct(S.male,T)}"></div></div>
+        <div class="phone-sub">${fmt(S.male)} Leads</div>
+      </div>
+      <div class="outreach-box">
+        <div class="ol">Grösste Zielgruppe</div>
+        <div class="ov">${fmt(S.female)}</div>
+        <div class="os">Weibliche Leads</div>
+      </div>`);
+  }
   animateFills(document.getElementById('phone-bars'));
 
   // -- KANAL KPIs --
-  const paidSocial = 461;
-  const emailCh = 244;
-  const organicCh = 117;
-  setHTML('kpi-kanal', [
-    kpi(fmt(paidSocial), 'Paid Social', pct(paidSocial,T)+'% — IG + Facebook', true),
-    kpi(fmt(emailCh), 'Email / Newsletter', pct(emailCh,T)+'% aller Leads'),
-    kpi(fmt(organicCh), 'Organic / Direct', pct(organicCh,T)+'% aller Leads'),
-  ].join(''));
+  if (S.source.length > 1) {
+    const paidSocial = (S.source.find(d=>d.l==='Paid Instagram')?.v||0) + (S.source.find(d=>d.l==='Paid Facebook')?.v||0);
+    const emailCh = S.source.find(d=>d.l==='Email / Newsletter')?.v||0;
+    const organicCh = S.organic || 0;
+    setHTML('kpi-kanal', [
+      kpi(fmt(paidSocial), 'Paid Social', pct(paidSocial,T)+'% — IG + Facebook', true),
+      kpi(fmt(emailCh), 'Email / Newsletter', pct(emailCh,T)+'% aller Leads'),
+      kpi(fmt(organicCh), 'Organic / Direct', pct(organicCh,T)+'% aller Leads'),
+    ].join(''));
+  } else {
+    const metaAds = S.source[0]?.v || S.total;
+    const totalClicks = S.adsets.reduce((s,d)=>s+d.clicks,0);
+    const totalSpendKanal = S.campSpend.reduce((s,d)=>s+d.spend,0);
+    const cpc = totalClicks > 0 ? (totalSpendKanal/totalClicks).toFixed(2) : '0.00';
+    setHTML('kpi-kanal', [
+      kpi(fmt(metaAds), 'META Ads', '100% aller Leads', true),
+      kpi(fmt(totalClicks), 'Link-Klicks', 'Total Klicks auf Anzeigen'),
+      kpi('CHF '+cpc, 'CPC', 'Cost per Click'),
+    ].join(''));
+  }
 
   buildHBars('hbar-source',  S.source,  T);
   buildContentCards();
@@ -571,17 +660,30 @@ function render() {
     <div class="bv">${best.l} -- ${fmt(best.v)} Leads</div>
     <div class="bs">${pct(best.v,T)}% aller Leads via einem einzigen Creative</div>`);
 
-  const paid = [{l:'Paid Social (IG + FB)',v:461},{l:'Email / Newsletter',v:244},{l:'Organic / Direct',v:117}];
-  buildPaidBars(paid);
-  setHTML('paid-insights', [
-    ins('Paid Social Anteil',   pct(461,T)+'%'),
-    ins('Email-Anteil',         pct(244,T)+'%'),
-    ins('Organic-Anteil',       pct(117,T)+'%'),
-  ].join(''));
+  if (S.source.length > 1) {
+    const paidSocialMix = (S.source.find(d=>d.l==='Paid Instagram')?.v||0) + (S.source.find(d=>d.l==='Paid Facebook')?.v||0);
+    const emailChMix = S.source.find(d=>d.l==='Email / Newsletter')?.v||0;
+    const organicChMix = S.organic || 0;
+    const paid = [{l:'Paid Social (IG + FB)',v:paidSocialMix},{l:'Email / Newsletter',v:emailChMix},{l:'Organic / Direct',v:organicChMix}];
+    buildPaidBars(paid);
+    setHTML('paid-insights', [
+      ins('Paid Social Anteil', pct(paidSocialMix,T)+'%'),
+      ins('Email-Anteil', pct(emailChMix,T)+'%'),
+      ins('Organic-Anteil', pct(organicChMix,T)+'%'),
+    ].join(''));
+  } else {
+    const paid = [{l:'Paid Social (META Ads)',v:S.total}];
+    buildPaidBars(paid);
+    setHTML('paid-insights', [
+      ins('Paid Social Anteil', '100%'),
+      ins('DE-Anteil', pct(S.de_total,T)+'%'),
+      ins('Best Creative Anteil', pct(best.v,T)+'%'),
+    ].join(''));
+  }
 
   // -- KAMPAGNE KPIs --
-  const deBroad = S.camp.find(d=>d.l==='DE Broad (Paid)')?.v||0;
-  const frBroad = S.camp.find(d=>d.l==='FR Broad (Paid)')?.v||0;
+  const deBroad = S.camp.find(d=>d.l==='DE Broad (Paid)')?.v || S.camp.find(d=>d.l==='DE Broad')?.v || 0;
+  const frBroad = S.camp.find(d=>d.l==='FR Broad (Paid)')?.v || S.camp.find(d=>d.l==='FR Broad')?.v || 0;
   const totalMetaSpend = S.campSpend.reduce((s,d)=>s+d.spend,0);
   const totalMetaLeads = S.campSpend.reduce((s,d)=>s+d.leads,0);
   const avgCPLAll = totalMetaLeads > 0 ? (totalMetaSpend/totalMetaLeads).toFixed(2) : '0.00';
@@ -709,64 +811,124 @@ function render() {
 function renderLearnings() {
   const T = S.total || 1;
   const bestContent = [...S.content].sort((a,b)=>b.v-a.v)[0];
-  const deBroad = S.camp.find(d=>d.l==='DE Broad (Paid)')?.v||0;
-  const frBroad = S.camp.find(d=>d.l==='FR Broad (Paid)')?.v||0;
+  const deBroad = S.camp.find(d=>d.l==='DE Broad (Paid)')?.v || S.camp.find(d=>d.l==='DE Broad')?.v || 0;
+  const frBroad = S.camp.find(d=>d.l==='FR Broad (Paid)')?.v || S.camp.find(d=>d.l==='FR Broad')?.v || 0;
 
-  const learnings = [
-    {
-      icon: '📡', color: 'red', badge: 'badge-red', tag: 'Multi-Channel',
-      title: 'Paid Social dominant, aber Email überraschend stark',
-      text: `Paid Social (IG + FB) lieferte 461 Leads (${pct(461,T)}%), aber Email/Newsletter war mit 244 Leads (${pct(244,T)}%) ein starker zweiter Kanal. Multi-Channel-Ansatz zahlt sich aus.`
-    },
-    {
-      icon: '📞', color: 'green', badge: 'badge-green', tag: 'Datenqualität',
-      title: 'Telefonnummer-Qualität bei 98.4% -- herausragend',
-      text: `${fmt(S.withPhone)} von ${fmt(S.total)} Leads haben eine Telefonnummer hinterlassen (${pct(S.withPhone,T)}%). Nur ${fmt(S.noPhone)} Leads ohne Telefon -- ideale Basis für telefonisches Recruiting.`
-    },
-    {
-      icon: '🌍', color: 'teal', badge: 'badge-teal', tag: 'Sprachregionen',
-      title: 'DE/FR-Split: 64.4% DE, 35.6% FR',
-      text: `${fmt(S.de_total)} Leads aus DE vs. ${fmt(S.fr_total)} aus FR. FR-Markt zeigt starkes Potenzial mit über einem Drittel aller Leads.`
-    },
-    {
-      icon: '🌱', color: 'blue', badge: 'badge-blue', tag: 'Organic Bonus',
-      title: 'Organic als kostenloser Bonus-Kanal',
-      text: `${fmt(S.organic)} organische Leads (${pct(S.organic,T)}%) kamen ohne Werbebudget dazu -- über Instagram, Facebook und Direct. Ein willkommener Gratiseffekt neben den bezahlten Kanälen.`
-    },
-    {
-      icon: '📬', color: 'purple', badge: 'badge-purple', tag: 'Owned Channel',
-      title: 'Email als starker Owned Channel: 244 Leads (29.7%)',
-      text: `Der Newsletter-Kanal lieferte fast ein Drittel aller Leads -- ohne zusätzliche Werbekosten. Die bestehende E-Mail-Liste ist ein wertvolles Asset für zukünftige Kampagnen.`
-    },
-    {
-      icon: '⚡', color: 'orange', badge: 'badge-orange', tag: 'Effizienz',
-      title: 'Nur 7 Tage Laufzeit -- extrem effizient',
-      text: `822 Leads in nur einer Woche (20.--27. Aug 2025). Das entspricht durchschnittlich 117 Leads pro Tag -- eine sehr hohe Recruiting-Geschwindigkeit.`
-    },
-  ];
+  let learnings, nextSteps;
 
-  const nextSteps = [
-    {
-      icon: '📞',
-      title: 'Qualifizierte Leads kontaktieren',
-      desc: '809 Leads mit Telefonnummer für persönliches Recruiting-Gespräch kontaktieren -- DE und FR getrennt priorisieren.'
-    },
-    {
-      icon: '📸',
-      title: 'Shooting-Logistik planen',
-      desc: 'Mit den rekrutierten Kids die Shooting-Termine und Locations für die Levada Kids Kollektion koordinieren.'
-    },
-    {
-      icon: '📬',
-      title: 'E-Mail-Liste für Folgekampagnen nutzen',
-      desc: 'Die 244 Newsletter-Leads und die gesamte Liste für zukünftige Kampagnen und Updates aktivieren.'
-    },
-    {
-      icon: '🇫🇷',
-      title: 'FR-Markt skalieren',
-      desc: 'Mit 35.6% der Leads zeigt der FR-Markt starkes Potenzial. Gezielte FR-Kampagnen können den Anteil weiter steigern.'
-    },
-  ];
+  if (currentCampaign === 'recruiting') {
+    learnings = [
+      {
+        icon: '📡', color: 'red', badge: 'badge-red', tag: 'Multi-Channel',
+        title: 'Paid Social dominant, aber Email überraschend stark',
+        text: `Paid Social (IG + FB) lieferte 461 Leads (${pct(461,T)}%), aber Email/Newsletter war mit 244 Leads (${pct(244,T)}%) ein starker zweiter Kanal. Multi-Channel-Ansatz zahlt sich aus.`
+      },
+      {
+        icon: '📞', color: 'green', badge: 'badge-green', tag: 'Datenqualität',
+        title: 'Telefonnummer-Qualität bei 98.4% -- herausragend',
+        text: `${fmt(S.withPhone)} von ${fmt(S.total)} Leads haben eine Telefonnummer hinterlassen (${pct(S.withPhone,T)}%). Nur ${fmt(S.noPhone)} Leads ohne Telefon -- ideale Basis für telefonisches Recruiting.`
+      },
+      {
+        icon: '🌍', color: 'teal', badge: 'badge-teal', tag: 'Sprachregionen',
+        title: 'DE/FR-Split: 64.4% DE, 35.6% FR',
+        text: `${fmt(S.de_total)} Leads aus DE vs. ${fmt(S.fr_total)} aus FR. FR-Markt zeigt starkes Potenzial mit über einem Drittel aller Leads.`
+      },
+      {
+        icon: '🌱', color: 'blue', badge: 'badge-blue', tag: 'Organic Bonus',
+        title: 'Organic als kostenloser Bonus-Kanal',
+        text: `${fmt(S.organic)} organische Leads (${pct(S.organic,T)}%) kamen ohne Werbebudget dazu -- über Instagram, Facebook und Direct. Ein willkommener Gratiseffekt neben den bezahlten Kanälen.`
+      },
+      {
+        icon: '📬', color: 'purple', badge: 'badge-purple', tag: 'Owned Channel',
+        title: 'Email als starker Owned Channel: 244 Leads (29.7%)',
+        text: `Der Newsletter-Kanal lieferte fast ein Drittel aller Leads -- ohne zusätzliche Werbekosten. Die bestehende E-Mail-Liste ist ein wertvolles Asset für zukünftige Kampagnen.`
+      },
+      {
+        icon: '⚡', color: 'orange', badge: 'badge-orange', tag: 'Effizienz',
+        title: 'Nur 7 Tage Laufzeit -- extrem effizient',
+        text: `822 Leads in nur einer Woche (20.--27. Aug 2025). Das entspricht durchschnittlich 117 Leads pro Tag -- eine sehr hohe Recruiting-Geschwindigkeit.`
+      },
+    ];
+
+    nextSteps = [
+      {
+        icon: '📞',
+        title: 'Qualifizierte Leads kontaktieren',
+        desc: '809 Leads mit Telefonnummer für persönliches Recruiting-Gespräch kontaktieren -- DE und FR getrennt priorisieren.'
+      },
+      {
+        icon: '📸',
+        title: 'Shooting-Logistik planen',
+        desc: 'Mit den rekrutierten Kids die Shooting-Termine und Locations für die Levada Kids Kollektion koordinieren.'
+      },
+      {
+        icon: '📬',
+        title: 'E-Mail-Liste für Folgekampagnen nutzen',
+        desc: 'Die 244 Newsletter-Leads und die gesamte Liste für zukünftige Kampagnen und Updates aktivieren.'
+      },
+      {
+        icon: '🇫🇷',
+        title: 'FR-Markt skalieren',
+        desc: 'Mit 35.6% der Leads zeigt der FR-Markt starkes Potenzial. Gezielte FR-Kampagnen können den Anteil weiter steigern.'
+      },
+    ];
+  } else {
+    learnings = [
+      {
+        icon: '📸', color: 'red', badge: 'badge-red', tag: 'Creative Performance',
+        title: 'Image Ad DE klar stärker als Video Ad FR',
+        text: `Image Ad DE generierte ${fmt(702)} Leads (72.4%) vs. Video Ad FR mit ${fmt(269)} (27.8%). Statische Image Ads performen in DE besser als Video in FR.`
+      },
+      {
+        icon: '👩', color: 'purple', badge: 'badge-purple', tag: 'Gender-Insight',
+        title: 'Weibliche Zielgruppe dominiert mit 78.8%',
+        text: `${fmt(S.female)} weibliche Leads (${pct(S.female,T)}%) vs. ${fmt(S.male)} männliche (${pct(S.male,T)}%). Die Levada Kids Kollektion spricht primär Mütter an.`
+      },
+      {
+        icon: '💰', color: 'green', badge: 'badge-green', tag: 'Effizienz',
+        title: 'Extrem tiefer CPL von CHF 0.68',
+        text: `Durchschnittlicher CPL von CHF 0.68 bei Total-Spend von nur CHF 656.20. DE (CHF 0.64) und FR (CHF 0.77) beide sehr effizient.`
+      },
+      {
+        icon: '🌍', color: 'teal', badge: 'badge-teal', tag: 'Sprachregionen',
+        title: 'DE/FR-Split: 72.2% DE, 27.8% FR',
+        text: `${fmt(S.de_total)} Leads aus DE vs. ${fmt(S.fr_total)} aus FR. Ähnlicher Split wie bei der Recruiting-Kampagne.`
+      },
+      {
+        icon: '📊', color: 'blue', badge: 'badge-blue', tag: 'META Performance',
+        title: 'Tiefe Frequenz unter 2.0 -- kein Ad Fatigue',
+        text: `Beide Adsets mit Frequenz unter 1.85 über 26 Tage Laufzeit. Kein Risiko von Übersättigung bei der Zielgruppe.`
+      },
+      {
+        icon: '⚡', color: 'orange', badge: 'badge-orange', tag: 'Reichweite',
+        title: 'Knapp 36\'000 Personen erreicht',
+        text: `Total Reach von 35\'998 Personen bei nur CHF 656 Spend. Sehr kosteneffizientes Audience Building.`
+      },
+    ];
+
+    nextSteps = [
+      {
+        icon: '🎯',
+        title: 'Lead-Daten segmentieren',
+        desc: 'Gender- und Sprachdaten nutzen, um Zielgruppen für personalisierte Follow-up-Kommunikation zu bilden.'
+      },
+      {
+        icon: '📬',
+        title: 'E-Mail Follow-up starten',
+        desc: 'Personalisierte E-Mail-Sequenzen an die 969 Leads versenden -- DE und FR getrennt, mit Gender-spezifischem Content.'
+      },
+      {
+        icon: '📸',
+        title: 'Creative Learnings anwenden',
+        desc: 'Image Ads in DE weiter pushen. FR-Video-Ads testen ob alternatives Creative die Performance steigern kann.'
+      },
+      {
+        icon: '🔄',
+        title: 'Cross-Kampagnen Synergien nutzen',
+        desc: 'Leads aus Recruiting- und LeadGen-Kampagne zusammenführen für ein vollständiges Levada Kids Audience-Profil.'
+      },
+    ];
+  }
 
   const panel = document.getElementById('tab-learnings');
   panel.innerHTML = `
@@ -821,8 +983,12 @@ function renderDonuts() {
   const T = S.total || 1;
   const items = [
     {id:'d-leads', pct:100, label:'Total Leads', val:S.total},
-    {id:'d-tel',   pct:+pct(S.withPhone,T), label:'Mit Telefon', val:S.withPhone},
   ];
+  if (S.dataType === 'phone') {
+    items.push({id:'d-tel', pct:+pct(S.withPhone,T), label:'Mit Telefon', val:S.withPhone});
+  } else {
+    items.push({id:'d-tel', pct:+pct(S.female,T), label:'Weiblich', val:S.female});
+  }
   const CIRC = 2*Math.PI*44;
   setHTML('donuts-row', items.map(it=>`
     <div class="donut-wrap">
@@ -878,10 +1044,17 @@ function renderBarChart(id, data, total) {
 
 
 /* -- CREATIVE IMAGES -- */
-const CREATIVE_IMGS = {
-  'Image Ad DE (20.08)': 'images/2008_levada_recrute_image_de.png',
-  'Image Ad FR (20.08)': 'images/2008_levada_recrute_image_fr.png',
+const CREATIVE_IMGS_MAP = {
+  recruiting: {
+    'Image Ad DE (20.08)': 'images/2008_levada_recrute_image_de.png',
+    'Image Ad FR (20.08)': 'images/2008_levada_recrute_image_fr.png',
+  },
+  leadgen: {
+    'Image Ad DE (31.10)': 'images/3110_levada_image_de.png',
+    'Video Ad FR (31.10)': 'images/3110_levada_image_fr.png',
+  }
 };
+let CREATIVE_IMGS = CREATIVE_IMGS_MAP.recruiting;
 
 const CREATIVE_ASPECT = {};
 
@@ -993,10 +1166,17 @@ function buildEditPanel() {
     <div class="ep-section-title">Übersicht -- Hauptzahlen</div>
     <div class="ep-row">
       <div class="ep-field"><label>Total Leads</label><input type="number" data-key="total" value="${S.total}"></div>
+      ${S.dataType === 'phone' ? `
       <div class="ep-field"><label>Mit Telefonnummer</label><input type="number" data-key="withPhone" value="${S.withPhone}"></div>
     </div>
     <div class="ep-row">
       <div class="ep-field"><label>Ohne Telefonnummer</label><input type="number" data-key="noPhone" value="${S.noPhone}"></div>
+      ` : `
+      <div class="ep-field"><label>Weiblich</label><input type="number" data-key="female" value="${S.female}"></div>
+    </div>
+    <div class="ep-row">
+      <div class="ep-field"><label>Männlich</label><input type="number" data-key="male" value="${S.male}"></div>
+      `}
     </div>
   </div>
 
@@ -1058,6 +1238,38 @@ function showToast() {
 ============================================= */
 Chart.defaults.font.family = "'Outfit','Helvetica Neue',sans-serif";
 Chart.defaults.color = '#888';
+
+/* =============================================
+   CAMPAIGN SWITCHER
+============================================= */
+function switchCampaign(key) {
+  currentCampaign = key;
+  S = JSON.parse(JSON.stringify(CAMPAIGNS[key]));
+  CREATIVE_IMGS = CREATIVE_IMGS_MAP[key];
+
+  // Update switcher UI
+  document.querySelectorAll('.campaign-switch-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.campaign === key);
+  });
+
+  // Update header subtitle
+  document.querySelector('.header-sub').textContent = S.meta.subtitle;
+
+  // Destroy all existing Chart.js instances
+  Object.keys(charts).forEach(k => { charts[k].destroy(); delete charts[k]; });
+
+  // Re-render everything
+  render();
+
+  // Re-run counters on active tab
+  document.querySelectorAll('.tab-panel.active [data-count]').forEach(el => {
+    animateCount(el, +el.dataset.count);
+  });
+}
+
+document.querySelectorAll('.campaign-switch-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchCampaign(btn.dataset.campaign));
+});
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
