@@ -180,7 +180,19 @@ main{padding:22px 32px 52px;}
 .spend-table .cpl-good{color:#16a34a;font-weight:700;}
 .spend-table .cpl-mid{color:#d97706;font-weight:700;}
 .spend-table .cpl-bad{color:#dc2626;font-weight:700;}
-.spend-total-row td{background:#FFF5F5 !important;color:var(--red) !important;}
+.spend-total-row td{background:#fafafa !important;color:var(--black) !important;}
+.spend-total-row .cpl-good,.spend-total-row .cpl-mid,.spend-total-row .cpl-bad{color:inherit;}
+.spend-total-row .cpl-good strong,.spend-total-row .cpl-mid strong,.spend-total-row .cpl-bad strong{color:inherit;}
+.spend-total-row .cpl-good{color:#16a34a !important;}
+.spend-total-row .cpl-mid{color:#d97706 !important;}
+.spend-total-row .cpl-bad{color:#dc2626 !important;}
+.cpl-info-wrap{position:relative;display:inline-flex;align-items:center;}
+.cpl-info-btn{background:none;border:1.5px solid var(--grey-light);border-radius:50%;width:16px;height:16px;font-size:10px;font-weight:800;color:var(--grey);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;margin-left:5px;padding:0;line-height:1;transition:all 0.15s;vertical-align:middle;}
+.cpl-info-btn:hover{border-color:var(--red);color:var(--red);}
+.cpl-tooltip{display:none;position:absolute;top:calc(100% + 8px);right:-10px;background:var(--black);color:#fff;border-radius:8px;padding:12px 14px;font-size:11px;line-height:1.6;width:220px;z-index:50;box-shadow:0 4px 20px rgba(0,0,0,0.25);font-weight:400;text-align:left;}
+.cpl-tooltip.open{display:block;}
+.cpl-tooltip::before{content:'';position:absolute;top:-6px;right:16px;width:12px;height:12px;background:var(--black);transform:rotate(45deg);border-radius:2px;}
+.cpl-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle;}
 .cmp-list{display:flex;flex-direction:column;gap:18px;}
 .cmp-row{display:flex;flex-direction:column;gap:6px;}
 .cmp-label{font-size:11px;font-weight:700;color:var(--black);letter-spacing:0.04em;}
@@ -370,7 +382,6 @@ main{padding:22px 32px 52px;}
     <button class="tab-btn active" data-tab="uebersicht">ÜBERSICHT</button>
     <button class="tab-btn" data-tab="kanal">LEADS &amp; KANAL</button>
     <button class="tab-btn" data-tab="kampagne">META-KAMPAGNE DETAIL</button>
-    <button class="tab-btn" data-tab="kantone">KANTONE</button>
     <button class="tab-btn" data-tab="learnings">LEARNINGS & NEXT STEPS</button>
   </div>
 </header>
@@ -385,16 +396,12 @@ main{padding:22px 32px 52px;}
         <div class="donuts-row" id="donuts-row"></div>
       </div>
       <div class="card">
-        <div class="card-title">Lead-Typ Verteilung</div>
+        <div class="card-title">Telefonnummer-Qualität</div>
         <div style="position:relative;height:205px"><canvas id="chart-roles"></canvas></div>
       </div>
       <div class="card">
         <div class="card-title">Sprach-Split DE / FR</div>
         <div style="position:relative;height:205px"><canvas id="chart-lang"></canvas></div>
-      </div>
-      <div class="card span-2">
-        <div class="card-title">Top 5 Städte (CH)</div>
-        <div style="position:relative;height:155px"><canvas id="chart-cities"></canvas></div>
       </div>
       <div class="card">
         <div class="card-title">Telefon-Qualität der Leads</div>
@@ -457,9 +464,6 @@ main{padding:22px 32px 52px;}
     </div>
   </div>
 
-  <!-- KANTONE -->
-  <div class="tab-panel" id="tab-kantone"></div>
-
   <!-- LEARNINGS -->
   <div class="tab-panel" id="tab-learnings"></div>
 </main>
@@ -470,18 +474,16 @@ main{padding:22px 32px 52px;}
 ============================================= */
 let S = {
   meta: { title: 'Fünfer-Challenge 2026', stand: 'Stand März 2026' },
-  total: 7509, fans: 7509, participants: 0,
+  total: 7509,
   withPhone: 4030, noPhone: 3479, organic: 160,
-  broad: 7349, retarget: 0, de_total: 4900, fr_total: 2609,
+  broad: 7349, de_total: 4900, fr_total: 2609,
 
-  source:  [{l:'Instagram',v:5598},{l:'Facebook',v:1751},{l:'Organisch/Direkt',v:160},{l:'Print',v:0},{l:'Website',v:0},{l:'LinkedIn',v:0},{l:'Andere',v:0}],
+  source:  [{l:'Instagram',v:5598},{l:'Facebook',v:1751},{l:'Organisch/Direkt',v:160}],
   content: [{l:'Image Ad 2',v:3424},{l:'Image Ad 3',v:904},{l:'Image Ad 1',v:381},{l:'Story (organisch)',v:160},{l:'Odlo',v:29},{l:'Andere',v:2}],
-  camp:    [{l:'DE Broad',v:4740},{l:'FR Broad',v:2609},{l:'DE Retarget',v:0},{l:'FR Retarget',v:0}],
+  camp:    [{l:'DE Broad',v:4740},{l:'FR Broad',v:2609}],
   campSpend: [
     {l:'DE Broad',    leads:4795, cpl:0.42, spend:2033.62},
     {l:'FR Broad',    leads:2525, cpl:0.38, spend:966.36},
-    {l:'DE Retarget', leads:0, cpl:0, spend:0},
-    {l:'FR Retarget', leads:0, cpl:0, spend:0},
   ],
   adsets: [
     {l:'adset1-de-broad (02.02.2026)', impressions:249936, reach:74967, freq:3.33, cpm:4.98, clicks:8360, von:'02.02.2026', bis:'28.02.2026', days:26},
@@ -491,13 +493,6 @@ let S = {
     {l:'adset2-fr-broad (20.02.2026)', impressions:59976,  reach:30907, freq:1.94, cpm:3.85, clicks:1357, von:'20.02.2026', bis:'28.02.2026', days:8},
     {l:'adset2-fr-broad (30.01.2026)', impressions:8526,   reach:4503,  freq:1.89, cpm:4.98, clicks:206,  von:'30.01.2026', bis:'02.02.2026', days:4},
   ],
-  kantone: {
-    fans: [{l:'Romandie',v:2430},{l:'BE / Mittelland',v:1281},{l:'ZH / Ostschweiz',v:946},{l:'BS / BL / AG / SO',v:910},{l:'ZG / LU / NW / OW',v:804},{l:'SG / AR / AI / TG',v:630},{l:'GR (Graubünden)',v:348},{l:'TI (Tessin)',v:159}],
-    tn:   [{l:'ZH / Ostschweiz',v:0},{l:'BE / Mittelland',v:0},{l:'GR (Graubünden)',v:0},{l:'ZG / LU / NW / OW',v:0},{l:'Romandie',v:0},{l:'BS / BL / AG / SO',v:0},{l:'SG / AR / AI / TG',v:0}],
-    fanCities: [{l:'Zürich',v:105},{l:'Bern',v:68},{l:'Chur',v:59},{l:'Lausanne',v:58},{l:'Luzern',v:53}],
-    tnCities:  [{l:'Zürich',v:0},{l:'Bern',v:0},{l:'Luzern',v:0},{l:'Chur',v:0},{l:'Lausanne',v:0}],
-  },
-  cities:  [{l:'Zürich',v:105},{l:'Bern',v:68},{l:'Chur',v:59},{l:'Lausanne',v:58},{l:'Luzern',v:53}],
 };
 
 const RED = '#E3001B';
@@ -520,10 +515,10 @@ function render() {
   // -- ÜBERSICHT KPIs --
   setHTML('kpi-uebersicht', [
     kpi(fmt(S.total),      'Total Leads',       'Alle Spielteilnahmen gesamt', true),
-    kpi(fmt(S.fans), 'Fans',              pct(S.fans,T)+'% aller Leads'),
-    kpi(fmt(S.participants),'Teilnehmer:innen','Angemeldete Starter:innen'),
     kpi(fmt(S.withPhone),'Mit Telefonnummer', pct(S.withPhone,T)+'% -- qualifiziert für Outreach'),
     kpi(fmt(S.noPhone),'Ohne Telefonnummer', pct(S.noPhone,T)+'% ohne Telefon'),
+    kpi(fmt(S.de_total),   'DE Leads',        pct(S.de_total,T)+'% aller Leads'),
+    kpi(fmt(S.fr_total),   'FR Leads',        pct(S.fr_total,T)+'% aller Leads'),
     kpi(fmt(S.organic),'Organisch / Direkt', 'Leads ohne UTM-Tracking'),
   ].join(''));
 
@@ -532,11 +527,9 @@ function render() {
 
   // Charts
   renderDonutChart('chart-roles',
-    [{l:'Fans',v:S.fans},{l:'Teilnehmer:innen',v:S.participants}], T);
+    [{l:'Mit Telefonnummer',v:S.withPhone},{l:'Ohne Telefonnummer',v:S.noPhone}], T);
   renderDonutChart('chart-lang',
     [{l:'Deutsch',v:S.de_total||Math.round(T*0.75)},{l:'Français',v:S.fr_total||Math.round(T*0.25)}], T);
-  renderBarChart('chart-cities', S.cities, T);
-
   // Phone bars
   setHTML('phone-bars', `
     <div class="phone-bar-row">
@@ -559,16 +552,10 @@ function render() {
   // -- KANAL KPIs --
   const ig = S.source.find(d=>d.l==='Instagram')?.v||0;
   const fb = S.source.find(d=>d.l==='Facebook')?.v||0;
-  const pr = S.source.find(d=>d.l==='Print')?.v||0;
-  const wb = S.source.find(d=>d.l==='Website')?.v||0;
-  const li = S.source.find(d=>d.l==='LinkedIn')?.v||0;
   setHTML('kpi-kanal', [
     kpi(fmt(ig), 'Instagram',       pct(ig,T)+'% -- stärkster Kanal', true),
     kpi(fmt(fb), 'Facebook',        pct(fb,T)+'% aller Leads'),
     kpi(fmt(S.organic),'Organisch / Direkt','Kein UTM trackbar'),
-    kpi(fmt(pr), 'Print / Offline', 'QR-Code Flyer'),
-    kpi(fmt(wb), 'Website',         'Direkter Seitenaufruf'),
-    kpi(fmt(li), 'LinkedIn',        'Kleinster bezahlter Kanal'),
   ].join(''));
 
   buildHBars('hbar-source',  S.source,  T);
@@ -582,7 +569,7 @@ function render() {
     <div class="bs">${pct(best.v,T)}% aller Leads via einem einzigen Creative</div>`);
 
   const paidTotal = ig+fb;
-  const paid = [{l:'Paid Social (IG + FB)',v:paidTotal},{l:'Organisch / Direkt',v:S.organic},{l:'Print / Offline',v:pr},{l:'Website / LinkedIn',v:wb+li}];
+  const paid = [{l:'Paid Social (IG + FB)',v:paidTotal},{l:'Organisch / Direkt',v:S.organic}];
   buildPaidBars(paid);
   setHTML('paid-insights', [
     ins('Paid Social Anteil',   pct(paidTotal,T)+'%'),
@@ -593,16 +580,13 @@ function render() {
   // -- KAMPAGNE KPIs --
   const deBroad = S.camp.find(d=>d.l==='DE Broad')?.v||0;
   const frBroad = S.camp.find(d=>d.l==='FR Broad')?.v||0;
-  const deRet   = S.camp.find(d=>d.l==='DE Retarget')?.v||0;
-  const frRet   = S.camp.find(d=>d.l==='FR Retarget')?.v||0;
   const totalMetaSpend = S.campSpend.reduce((s,d)=>s+d.spend,0);
   const totalMetaLeads = S.campSpend.reduce((s,d)=>s+d.leads,0);
   const avgCPLAll = totalMetaLeads > 0 ? (totalMetaSpend/totalMetaLeads).toFixed(2) : '0.00';
   setHTML('kpi-kampagne', [
     kpi(fmt(S.broad),      'Broad',              pct(S.broad,T)+'% aller Leads', true),
-    kpi(fmt(S.retarget),   'Retargeting',         pct(S.retarget,T)+'% aller Leads'),
-    kpi(fmt(S.de_total),   'DE Gesamt META',      'Broad + Retarget DE'),
-    kpi(fmt(S.fr_total),   'FR Gesamt META',      'Broad + Retarget FR'),
+    kpi(fmt(S.de_total),   'DE Gesamt META',      'Broad DE'),
+    kpi(fmt(S.fr_total),   'FR Gesamt META',      'Broad FR'),
     kpi('CHF '+fmt(Math.round(totalMetaSpend)),   'Total META Spend (CHF)',   fmt(totalMetaLeads)+' Leads via Ads Manager'),
     kpi('CHF '+avgCPLAll,  'Ø CPL (CHF)',         'Durchschnittlicher Cost per Lead'),
   ].join(''));
@@ -613,21 +597,18 @@ function render() {
   const totalSpend = S.campSpend.reduce((s,d)=>s+d.spend,0);
   const totalLeads = S.campSpend.reduce((s,d)=>s+d.leads,0);
   const avgCPL = totalLeads > 0 ? (totalSpend/totalLeads).toFixed(2) : '0.00';
-  const cplValues = S.campSpend.filter(d=>d.cpl>0).map(d=>d.cpl);
-  const bestCPL = cplValues.length > 0 ? Math.min(...cplValues) : 0;
-  const worstCPL = cplValues.length > 0 ? Math.max(...cplValues) : 0;
   function cplClass(cpl) {
     if(cpl <= 0) return '';
-    if(cpl <= bestCPL * 1.1) return 'cpl-good';
-    if(cpl >= worstCPL * 0.9) return 'cpl-bad';
-    return 'cpl-mid';
+    if(cpl <= 0.45) return 'cpl-good';
+    if(cpl <= 1.15) return 'cpl-mid';
+    return 'cpl-bad';
   }
   setHTML('spend-table', `
     <table class="spend-table">
       <thead><tr>
         <th>Adset</th>
         <th class="num">Leads</th>
-        <th class="num">CPL</th>
+        <th class="num"><span class="cpl-info-wrap">CPL<button class="cpl-info-btn" onclick="toggleCplInfo(event)">?</button><div class="cpl-tooltip" id="cpl-tooltip"><strong style="font-size:12px;display:block;margin-bottom:6px;">Cost per Lead (CPL)</strong><span class="cpl-dot" style="background:#16a34a;"></span>Bis CHF 0.45 = Günstig<br><span class="cpl-dot" style="background:#d97706;"></span>CHF 0.45 – 1.15 = Mittel<br><span class="cpl-dot" style="background:#dc2626;"></span>CHF 1.15 – 2.00 = Teuer</div></span></th>
         <th class="num">Spend</th>
         <th class="num">Anteil Budget</th>
       </tr></thead>
@@ -642,7 +623,7 @@ function render() {
         <tr class="spend-total-row">
           <td><strong>Total META</strong></td>
           <td class="num"><strong>${fmt(totalLeads)}</strong></td>
-          <td class="num"><strong>CHF ${avgCPL}</strong></td>
+          <td class="num ${cplClass(+avgCPL)}"><strong>CHF ${avgCPL}</strong></td>
           <td class="num"><strong>CHF ${totalSpend.toLocaleString('de-CH',{minimumFractionDigits:2,maximumFractionDigits:2})}</strong></td>
           <td class="num"><strong>100%</strong></td>
         </tr>
@@ -697,23 +678,20 @@ function render() {
     <div class="defr-col">
       <div class="defr-lang" style="color:var(--red)">Deutsch (DE)</div>
       <div class="defr-bar"><div class="defr-head"><span>Broad</span><span>${fmt(deBroad)}</span></div><div class="defr-track"><div class="defr-fill" style="background:var(--red)" data-w="${pct(deBroad,T)}"></div></div></div>
-      <div class="defr-bar"><div class="defr-head"><span>Retarget</span><span>${fmt(deRet)}</span></div><div class="defr-track"><div class="defr-fill" style="background:var(--red);opacity:0.35" data-w="${pct(deRet,T)}"></div></div></div>
     </div>
     <div class="defr-col">
       <div class="defr-lang" style="color:var(--grey)">Français (FR)</div>
       <div class="defr-bar"><div class="defr-head"><span>Broad</span><span>${fmt(frBroad)}</span></div><div class="defr-track"><div class="defr-fill" style="background:#BBBBBB" data-w="${pct(frBroad,T)}"></div></div></div>
-      <div class="defr-bar"><div class="defr-head"><span>Retarget</span><span>${fmt(frRet)}</span></div><div class="defr-track"><div class="defr-fill" style="background:#BBBBBB;opacity:0.5" data-w="${pct(frRet,T)}"></div></div></div>
     </div>
     <div class="defr-insights">
       ${ins('Breiteste Kampagne','DE Broad -- '+fmt(deBroad))}
       ${ins('FR Broad Anteil',    pct(frBroad,T)+'% aller Leads')}
-      ${ins('DE Retarget-Rate',   pct(deRet,Math.max(S.de_total,1))+'%')}
+      ${ins('DE-Anteil gesamt',   pct(S.de_total,T)+'%')}
     </div>`);
   animateFills(document.getElementById('defr-wrap'));
 
   // -- LEARNINGS --
   renderLearnings();
-  renderKantone();
 
   // Counters on active tab
   document.querySelectorAll('.tab-panel.active [data-count]').forEach(el => {
@@ -730,9 +708,7 @@ function renderLearnings() {
   const bestContent = [...S.content].sort((a,b)=>b.v-a.v)[0];
   const deBroad = S.camp.find(d=>d.l==='DE Broad')?.v||0;
   const frBroad = S.camp.find(d=>d.l==='FR Broad')?.v||0;
-  const deRet   = S.camp.find(d=>d.l==='DE Retarget')?.v||0;
-  const frRet   = S.camp.find(d=>d.l==='FR Retarget')?.v||0;
-  const metaTotal = deBroad + frBroad + deRet + frRet;
+  const metaTotal = deBroad + frBroad;
 
   const learnings = [
     {
@@ -748,12 +724,12 @@ function renderLearnings() {
     {
       icon: '🌍', color: 'teal', badge: 'badge-teal', tag: 'Sprachregionen',
       title: 'FR-Markt gezielt bearbeiten',
-      text: `${fmt(frBroad + frRet)} Leads aus FR-Kampagnen (${pct(frBroad+frRet,T)}% aller META-Leads). Die Performance in der Romandie beobachten und ggf. Budget anpassen.`
+      text: `${fmt(frBroad)} Leads aus FR-Kampagnen (${pct(frBroad,T)}% aller META-Leads). Die Performance in der Romandie beobachten und ggf. Budget anpassen.`
     },
     {
-      icon: '🔄', color: 'purple', badge: 'badge-purple', tag: 'Retargeting',
-      title: 'Retargeting-Pool aufbauen und aktivieren',
-      text: `DE + FR Retarget lieferten ${fmt(deRet+frRet)} Leads (${pct(deRet+frRet,Math.max(metaTotal,1))}% der META-Leads). Retargeting-Pool durch Broad-Kampagnen systematisch aufbauen.`
+      icon: '🔄', color: 'purple', badge: 'badge-purple', tag: 'Skalierung',
+      title: 'DE/FR Budget-Split laufend optimieren',
+      text: `DE Broad lieferte ${fmt(deBroad)} Leads, FR Broad ${fmt(frBroad)} Leads. Der CPL in FR ist tiefer -- Potenzial für Budget-Verschiebung Richtung FR prüfen.`
     },
     {
       icon: '📞', color: 'green', badge: 'badge-green', tag: 'Datenqualität',
@@ -824,55 +800,6 @@ function renderLearnings() {
     </div>`;
 }
 
-/* --- KANTONE --- */
-function renderKantone() {
-  const K = S.kantone;
-  const fanT = K.fans.reduce((s,d)=>s+d.v,0) || 1;
-  const tnT  = K.tn.reduce((s,d)=>s+d.v,0) || 1;
-  const panel = document.getElementById('tab-kantone');
-
-  panel.innerHTML = `
-    <div class="learnings-header">Geografische Herkunft -- Fans (n=${fmt(K.fans.reduce((s,d)=>s+d.v,0))}) vs. Teilnehmer:innen (n=${fmt(K.tn.reduce((s,d)=>s+d.v,0))})</div>
-
-    <div class="grid-2" style="margin-bottom:16px">
-      <div class="card">
-        <div class="card-title">Kantone -- Fans <span style="font-weight:400;color:var(--grey)">(n=${fmt(K.fans.reduce((s,d)=>s+d.v,0))})</span></div>
-        <div class="hbar-list" id="hbar-fan-kantone"></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Kantone -- Teilnehmer:innen <span style="font-weight:400;color:var(--grey)">(n=${fmt(K.tn.reduce((s,d)=>s+d.v,0))})</span></div>
-        <div class="hbar-list" id="hbar-tn-kantone"></div>
-      </div>
-    </div>
-
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title">Regionen-Mix -- Fans</div>
-        <div style="position:relative;height:220px"><canvas id="chart-fan-kantone"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Regionen-Mix -- Teilnehmer:innen</div>
-        <div style="position:relative;height:220px"><canvas id="chart-tn-kantone"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Top 5 Städte -- Fans</div>
-        <div class="hbar-list" id="hbar-fan-cities"></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Top 5 Städte -- Teilnehmer:innen</div>
-        <div class="hbar-list" id="hbar-tn-cities"></div>
-      </div>
-    </div>`;
-
-  buildHBars('hbar-fan-kantone', K.fans, fanT);
-  buildHBars('hbar-tn-kantone',  K.tn,   tnT);
-  renderDonutChart('chart-fan-kantone', K.fans, fanT);
-  renderDonutChart('chart-tn-kantone',  K.tn,   tnT);
-  buildHBars('hbar-fan-cities', K.fanCities, fanT);
-  buildHBars('hbar-tn-cities',  K.tnCities,  tnT);
-  animateFills(panel);
-}
-
 function kpi(val, label, sub, accent=false) {
   const numStr = typeof val === 'string' && val.replace(/[^0-9]/g,'');
   const hasCount = !isNaN(+numStr) && numStr.length > 0 && !val.includes(':') && !/^[A-Za-z]/.test(val);
@@ -891,9 +818,8 @@ function setHTML(id, html) { const el=document.getElementById(id); if(el) el.inn
 function renderDonuts() {
   const T = S.total || 1;
   const items = [
-    {id:'d-fans', pct:+pct(S.fans,T),   label:'Fans',           val:S.fans},
-    {id:'d-tn',   pct:+pct(S.participants,T), label:'Teilnehmer:innen', val:S.participants},
-    {id:'d-tel',  pct:+pct(S.withPhone,T), label:'Mit Telefon', val:S.withPhone},
+    {id:'d-leads', pct:100, label:'Total Leads', val:S.total},
+    {id:'d-tel',   pct:+pct(S.withPhone,T), label:'Mit Telefon', val:S.withPhone},
   ];
   const CIRC = 2*Math.PI*44;
   setHTML('donuts-row', items.map(it=>`
@@ -1062,10 +988,6 @@ function buildEditPanel() {
     <div class="ep-section-title">Übersicht -- Hauptzahlen</div>
     <div class="ep-row">
       <div class="ep-field"><label>Total Leads</label><input type="number" data-key="total" value="${S.total}"></div>
-      <div class="ep-field"><label>Fans</label><input type="number" data-key="fans" value="${S.fans}"></div>
-    </div>
-    <div class="ep-row">
-      <div class="ep-field"><label>Teilnehmer:innen</label><input type="number" data-key="participants" value="${S.participants}"></div>
       <div class="ep-field"><label>Mit Telefonnummer</label><input type="number" data-key="withPhone" value="${S.withPhone}"></div>
     </div>
     <div class="ep-row">
@@ -1088,7 +1010,6 @@ function buildEditPanel() {
     <div class="ep-section-title">META-Kampagne Detail</div>
     <div class="ep-row">
       <div class="ep-field"><label>Broad-Kampagnen</label><input type="number" data-key="broad" value="${S.broad}"></div>
-      <div class="ep-field"><label>Retargeting</label><input type="number" data-key="retarget" value="${S.retarget}"></div>
     </div>
     <div class="ep-row">
       <div class="ep-field"><label>DE Gesamt</label><input type="number" data-key="de_total" value="${S.de_total}"></div>
@@ -1145,6 +1066,17 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     });
     animateFills(document.querySelector('.tab-panel.active'));
   });
+});
+
+/* -- CPL INFO TOOLTIP -- */
+function toggleCplInfo(e) {
+  e.stopPropagation();
+  const tt = document.getElementById('cpl-tooltip');
+  if(tt) tt.classList.toggle('open');
+}
+document.addEventListener('click', () => {
+  const tt = document.getElementById('cpl-tooltip');
+  if(tt) tt.classList.remove('open');
 });
 
 // Initial render

@@ -180,7 +180,19 @@ main{padding:22px 32px 52px;}
 .spend-table .cpl-good{color:#16a34a;font-weight:700;}
 .spend-table .cpl-mid{color:#d97706;font-weight:700;}
 .spend-table .cpl-bad{color:#dc2626;font-weight:700;}
-.spend-total-row td{background:#FFF5F5 !important;color:var(--red) !important;}
+.spend-total-row td{background:#fafafa !important;color:var(--black) !important;}
+.spend-total-row .cpl-good,.spend-total-row .cpl-mid,.spend-total-row .cpl-bad{color:inherit;}
+.spend-total-row .cpl-good strong,.spend-total-row .cpl-mid strong,.spend-total-row .cpl-bad strong{color:inherit;}
+.spend-total-row .cpl-good{color:#16a34a !important;}
+.spend-total-row .cpl-mid{color:#d97706 !important;}
+.spend-total-row .cpl-bad{color:#dc2626 !important;}
+.cpl-info-wrap{position:relative;display:inline-flex;align-items:center;}
+.cpl-info-btn{background:none;border:1.5px solid var(--grey-light);border-radius:50%;width:16px;height:16px;font-size:10px;font-weight:800;color:var(--grey);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;margin-left:5px;padding:0;line-height:1;transition:all 0.15s;vertical-align:middle;}
+.cpl-info-btn:hover{border-color:var(--red);color:var(--red);}
+.cpl-tooltip{display:none;position:absolute;top:calc(100% + 8px);right:-10px;background:var(--black);color:#fff;border-radius:8px;padding:12px 14px;font-size:11px;line-height:1.6;width:220px;z-index:50;box-shadow:0 4px 20px rgba(0,0,0,0.25);font-weight:400;text-align:left;}
+.cpl-tooltip.open{display:block;}
+.cpl-tooltip::before{content:'';position:absolute;top:-6px;right:16px;width:12px;height:12px;background:var(--black);transform:rotate(45deg);border-radius:2px;}
+.cpl-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle;}
 .cmp-list{display:flex;flex-direction:column;gap:18px;}
 .cmp-row{display:flex;flex-direction:column;gap:6px;}
 .cmp-label{font-size:11px;font-weight:700;color:var(--black);letter-spacing:0.04em;}
@@ -710,19 +722,18 @@ function render() {
   const totalSpend = S.campSpend.reduce((s,d)=>s+d.spend,0);
   const totalLeads = S.campSpend.reduce((s,d)=>s+d.leads,0);
   const avgCPL = (totalSpend/totalLeads).toFixed(2);
-  const bestCPL = Math.min(...S.campSpend.map(d=>d.cpl));
-  const worstCPL = Math.max(...S.campSpend.map(d=>d.cpl));
   function cplClass(cpl) {
-    if(cpl <= bestCPL * 1.1) return 'cpl-good';
-    if(cpl >= worstCPL * 0.9) return 'cpl-bad';
-    return 'cpl-mid';
+    if(cpl <= 0) return '';
+    if(cpl <= 0.45) return 'cpl-good';
+    if(cpl <= 1.15) return 'cpl-mid';
+    return 'cpl-bad';
   }
   setHTML('spend-table', `
     <table class="spend-table">
       <thead><tr>
         <th>Adset</th>
         <th class="num">Leads</th>
-        <th class="num">CPL</th>
+        <th class="num"><span class="cpl-info-wrap">CPL<button class="cpl-info-btn" onclick="toggleCplInfo(event)">?</button><div class="cpl-tooltip" id="cpl-tooltip"><strong style="font-size:12px;display:block;margin-bottom:6px;">Cost per Lead (CPL)</strong><span class="cpl-dot" style="background:#16a34a;"></span>Bis CHF 0.45 = Günstig<br><span class="cpl-dot" style="background:#d97706;"></span>CHF 0.45 – 1.15 = Mittel<br><span class="cpl-dot" style="background:#dc2626;"></span>CHF 1.15 – 2.00 = Teuer</div></span></th>
         <th class="num">Spend</th>
         <th class="num">Anteil Budget</th>
       </tr></thead>
@@ -737,7 +748,7 @@ function render() {
         <tr class="spend-total-row">
           <td><strong>Total META</strong></td>
           <td class="num"><strong>${fmt(totalLeads)}</strong></td>
-          <td class="num"><strong>CHF ${avgCPL}</strong></td>
+          <td class="num ${cplClass(+avgCPL)}"><strong>CHF ${avgCPL}</strong></td>
           <td class="num"><strong>CHF ${totalSpend.toLocaleString('de-CH',{minimumFractionDigits:2,maximumFractionDigits:2})}</strong></td>
           <td class="num"><strong>100%</strong></td>
         </tr>
@@ -1471,6 +1482,17 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     });
     animateFills(document.querySelector('.tab-panel.active'));
   });
+});
+
+/* -- CPL INFO TOOLTIP -- */
+function toggleCplInfo(e) {
+  e.stopPropagation();
+  const tt = document.getElementById('cpl-tooltip');
+  if(tt) tt.classList.toggle('open');
+}
+document.addEventListener('click', () => {
+  const tt = document.getElementById('cpl-tooltip');
+  if(tt) tt.classList.remove('open');
 });
 
 // Initial render
